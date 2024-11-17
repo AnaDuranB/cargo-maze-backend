@@ -19,7 +19,7 @@ public class CargoMazeWebSocketConfig implements WebSocketMessageBrokerConfigure
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/stompendpoint").withSockJS();    
+        registry.addEndpoint("/stompendpoint").setAllowedOrigins("https://calm-rock-0d4eb650f.5.azurestaticapps.net").withSockJS();    
     }
     
 }
