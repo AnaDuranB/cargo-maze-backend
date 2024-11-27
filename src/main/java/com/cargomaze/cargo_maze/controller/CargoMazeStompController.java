@@ -8,14 +8,14 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import com.cargomaze.cargo_maze.model.Position;
-import com.cargomaze.cargo_maze.services.CargoMazeServices;
+import com.cargomaze.cargo_maze.services.CargoMazeServicesImpl;
 
 @Controller
 public class CargoMazeStompController {
 
     private SimpMessagingTemplate msgt;
     private String topicUri = "/topic/sessions";
-    private CargoMazeServices services;
+    private CargoMazeServicesImpl services;
 
 
     @Autowired
@@ -24,7 +24,7 @@ public class CargoMazeStompController {
     }
     
     @Autowired
-    public void setServices(CargoMazeServices services){
+    public void setServices(CargoMazeServicesImpl services){
         this.services = services;
     }
 
