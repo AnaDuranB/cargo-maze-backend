@@ -70,14 +70,6 @@ public class InMemoryCargoMazePersistance implements CargoMazePersistance{
     }
 
     @Override
-    public void removePlayerFromGame(String nickname, String gameSessionId) throws CargoMazePersistanceException {
-        Player player = getPlayer(nickname);
-        GameSession session = getSession(gameSessionId);
-        session.removePlayer(player);
-        
-    }
-
-    @Override
     public Player getPlayer(String playerId, String gameSession) throws CargoMazePersistanceException {
         Player player = players.get(playerId);
         if(player == null){

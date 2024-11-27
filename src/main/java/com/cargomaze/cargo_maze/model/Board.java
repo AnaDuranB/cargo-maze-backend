@@ -146,12 +146,12 @@ public class Board {
 
 
     private void addTarget(Position position) {
-        cells[position.getX()][position.getY()] = new Cell(Cell.TARGET);;
+        cells[position.getX()][position.getY()] = new Cell(Cell.TARGET);
         targetPositions.add(position);
     }
 
     public void addBox(Position position) {
-        cells[position.getX()][position.getY()] = new Cell(Cell.BOX);;
+        cells[position.getX()][position.getY()] = new Cell(Cell.BOX);
         boxes.add(new Box(UUID.randomUUID().toString(), position));
     }
 
@@ -187,7 +187,6 @@ public class Board {
             default: return "?";
         }
     }
-
 
     public void setPlayerInBoard(Position position){
         cells[position.getX()][position.getY()] = new Cell(Cell.PLAYER);

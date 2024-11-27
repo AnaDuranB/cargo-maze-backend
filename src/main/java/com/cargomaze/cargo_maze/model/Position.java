@@ -2,8 +2,6 @@ package com.cargomaze.cargo_maze.model;
 
 import java.util.Objects;
 
-import lombok.ToString;
-
 public class Position {
     private int x;
     private int y;

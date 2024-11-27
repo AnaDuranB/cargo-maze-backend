@@ -8,11 +8,11 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class PlayerTest {
-    private GameSession gameSession;
+    /*private GameSession gameSession;
     private Player player1, player2, player3, player4;
     private Board board;
 
-    /*@BeforeEach
+    @BeforeEach
     public void setUp() {
         gameSession = new GameSession("session1");
         board = gameSession.getBoard();

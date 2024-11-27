@@ -24,7 +24,4 @@ public interface CargoMazePersistance {
 
     public List<Player> getPlayersInSession(String id) throws CargoMazePersistanceException;
 
-    public void removePlayerFromGame(String nickname, String gameSessionId) throws CargoMazePersistanceException;
-
-
 }

@@ -126,11 +126,11 @@ public class CargoMazeController {
             return ResponseEntity.badRequest().body(Map.of("error", "position is required"));
         }
         try {
-            if(!cargoMazeServices.movePlayer(nickname, sessionId, position)){
+            if(!cargoMazeServices.move(nickname, sessionId, position)){
                 return ResponseEntity.badRequest().body(Map.of("error", "Invalid move"));
             }
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(Map.of("message", "Player moved", "sessionId", sessionId, "nickname", nickname));
-        } catch (CargoMazePersistanceException ex) {
+        } catch (CargoMazePersistanceException | CargoMazeServicesException ex) {
             return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
         }
     }
