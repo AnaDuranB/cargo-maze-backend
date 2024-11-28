@@ -5,10 +5,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.locks.ReentrantLock;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-
+@Document
 public class GameSession {
+    @Id
     private String sessionId;
     private List<Player> players;
     private GameStatus status;
@@ -85,9 +87,17 @@ public class GameSession {
         return board.getBoardState();
     }
 
+    public void setPlayers(List<Player> players) {
+        this.players = players;
+    }
+
+    public void setBoard(Board board) {
+        this.board = board;
+    }
+
     public void removePlayer(Player player) {
         board.setCellState(player.getPosition(), Cell.EMPTY);
-        players.remove(player);
+        System.out.println(players.remove(player));
         indexes.add(player.getIndex());
         player.setIndex(-1);
         player.updatePosition(null);
@@ -99,3 +109,4 @@ public class GameSession {
         //indexes.addAll(Arrays.asList(0, 1, 2, 3));
     }
 }
+

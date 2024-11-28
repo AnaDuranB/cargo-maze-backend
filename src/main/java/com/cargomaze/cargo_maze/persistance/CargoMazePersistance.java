@@ -10,18 +10,18 @@ import java.util.List;
 
 public interface CargoMazePersistance {
 
-    public void addPlayer(Player player) throws CargoMazePersistanceException;
+    void addPlayer(Player player) throws CargoMazePersistanceException;
 
-    public Player getPlayer(String playerId) throws CargoMazePersistanceException;
+    Player getPlayer(String playerId) throws CargoMazePersistanceException;
 
-    public Player getPlayer(String playerId, String gameSession) throws CargoMazePersistanceException;
+    Player getPlayer(String playerId, String gameSession) throws CargoMazePersistanceException;
 
-    public void addSession(GameSession session) throws CargoMazePersistanceException;
+    void addSession(GameSession session) throws CargoMazePersistanceException;
 
-    public GameSession getSession(String gameSessionId) throws CargoMazePersistanceException;
+    GameSession getSession(String gameSessionId) throws CargoMazePersistanceException;
 
-    public int getPlayerCount(String gameSessionId) throws CargoMazePersistanceException;
+    int getPlayerCount(String gameSessionId) throws CargoMazePersistanceException;
 
-    public List<Player> getPlayersInSession(String id) throws CargoMazePersistanceException;
+    List<Player> getPlayersInSession(String id) throws CargoMazePersistanceException;
 
 }

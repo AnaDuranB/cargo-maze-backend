@@ -1,6 +1,5 @@
 package com.cargomaze.cargo_maze.config;
 
-import java.util.logging.Logger;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
