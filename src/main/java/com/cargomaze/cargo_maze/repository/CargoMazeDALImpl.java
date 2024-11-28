@@ -86,7 +86,12 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
 
     @Override
     public GameSession addSession(GameSession session) {
-        return mongoTemplate.save(session); 
+        Query query = new Query(Criteria.where(GAME_SESSION_ID).is(session.getSessionId()));
+        GameSession sessionInDataBase = mongoTemplate.findOne(query, GameSession.class);
+        if (sessionInDataBase == null) {
+            mongoTemplate.save(session); 
+        }
+        return sessionInDataBase; 
     }
 
     @Override
