@@ -9,27 +9,35 @@ import com.cargomaze.cargo_maze.persistance.exceptions.CargoMazePersistanceExcep
 import com.cargomaze.cargo_maze.services.exceptions.CargoMazeServicesException;
 
 public interface CargoMazeServices {
-    void createPlayer(String nickname) throws CargoMazePersistanceException;
+    Player createPlayer(String nickname) throws CargoMazePersistanceException, CargoMazeServicesException;
+
+    void deletePlayer(String playerId) throws CargoMazePersistanceException;
+
+    void deletePlayers() throws CargoMazePersistanceException;
 
     Player getPlayerById(String playerId) throws CargoMazePersistanceException;
+
+    List<Player> getPlayers() throws CargoMazePersistanceException;
 
     List<Player> getPlayersInSession(String gameSessionId) throws CargoMazePersistanceException;
 
     int getPlayerCount(String gameSessionId) throws CargoMazePersistanceException;
 
-    void addNewPlayerToGame(String nickname, String gameSessionId) throws CargoMazePersistanceException;
+    Player addNewPlayerToGame(String nickname, String gameSessionId) throws CargoMazePersistanceException;
 
-    void removePlayerFromGame(String nickname, String gameSessionId) throws CargoMazePersistanceException;
+    Player removePlayerFromGame(String nickname, String gameSessionId) throws CargoMazePersistanceException;
 
-    void createSession(String sessionId) throws CargoMazePersistanceException;
+    GameSession createSession(String sessionId) throws CargoMazePersistanceException;
 
     GameSession getGameSession(String gameSessionId) throws CargoMazePersistanceException;
 
-    void resetGameSession(String gameSessionId) throws CargoMazePersistanceException, CargoMazeServicesException;
+    GameSession resetGameSession(String gameSessionId) throws CargoMazePersistanceException, CargoMazeServicesException;
 
     String[][] getBoardState(String gameSessionId) throws CargoMazePersistanceException;
 
     boolean move(String playerId, String gameSessionId, Position direction) throws CargoMazePersistanceException, CargoMazeServicesException;
+
+    boolean isGameFinished(String gameSessionid) throws CargoMazePersistanceException;
     
     
 }

@@ -11,13 +11,19 @@ import com.cargomaze.cargo_maze.persistance.exceptions.CargoMazePersistanceExcep
 
 public interface CargoMazeDAL {
 
-    public void addPlayer(Player player) throws CargoMazePersistanceException;
+    public Player addPlayer(Player player) throws CargoMazePersistanceException;
 
     public Player getPlayer(String playerId) throws CargoMazePersistanceException;
 
+    public List<Player> getPlayers() throws CargoMazePersistanceException;
+
+    public void deletePlayer(Player player) throws CargoMazePersistanceException;
+
+    public void deletePlayers() throws CargoMazePersistanceException;
+
     public Player getPlayerInSession(String playerId, String gameSessionId) throws CargoMazePersistanceException;
 
-    public void addSession(GameSession session) throws CargoMazePersistanceException;
+    public GameSession addSession(GameSession session) throws CargoMazePersistanceException;
 
     public GameSession getSession(String gameSessionId) throws CargoMazePersistanceException;
 
@@ -25,14 +31,16 @@ public interface CargoMazeDAL {
 
     public List<Player> getPlayersInSession(String id) throws CargoMazePersistanceException;
 
-    public void updatePlayerById(String playerId) throws CargoMazePersistanceException;
+    public Player updatePlayerById(String playerId) throws CargoMazePersistanceException;
 
-    public void updatePlayer(Player player) throws CargoMazePersistanceException;
+    public Player updatePlayer(Player player) throws CargoMazePersistanceException;
 
-    public void updateGameSessionById(String sessionId) throws CargoMazePersistanceException;
+    public GameSession updateGameSessionById(String sessionId) throws CargoMazePersistanceException;
 
-    public void updateGameSession(GameSession session) throws CargoMazePersistanceException;
+    public GameSession updateGameSession(GameSession session) throws CargoMazePersistanceException;
 
     public void deletePlayer(String playerId) throws CargoMazePersistanceException;   
+
+    public void removePlayerFromSession(String playerId, String sessionId) throws CargoMazePersistanceException;
 
 }

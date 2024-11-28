@@ -4,8 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document
 public class Board {
 
+    @Id
     private String id;
     private static final int WIDTH = 15;
     private  static final int HEIGHT = 10;
@@ -15,6 +20,7 @@ public class Board {
     private List<Position> playerStartPositions;
      
     public Board() {
+        this.id = UUID.randomUUID().toString();
         initializeBoard();
     }
 
@@ -238,5 +244,17 @@ public class Board {
     
     public String getId(){
         return id;
+    }
+
+    @Override
+    public boolean equals(Object obj){
+        if(obj == this){
+            return true;
+        }
+        if(obj == null || obj.getClass() != this.getClass()){
+            return false;
+        }
+        Board board = (Board) obj;
+        return board.id.equals(this.id);
     }
 }

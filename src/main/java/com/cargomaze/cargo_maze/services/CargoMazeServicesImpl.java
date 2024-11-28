@@ -26,17 +26,27 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
     }
 
     @Override
-    public void createPlayer(String nickname) throws CargoMazePersistanceException {
+    public Player createPlayer(String nickname) throws CargoMazePersistanceException, CargoMazeServicesException {
         if (nickname == null || nickname.isEmpty()) {
-            throw new CargoMazePersistanceException("Invalid nickname");
+            throw new CargoMazeServicesException(CargoMazeServicesException.INVALID_NICKNAME);
         }
-
         Player player = new Player(nickname);
-        persistance.addPlayer(player);
+        return persistance.addPlayer(player);
     }
 
     @Override
-    public void addNewPlayerToGame(String nickname, String gameSessionId) throws CargoMazePersistanceException {
+    public void deletePlayer(String playerId) throws CargoMazePersistanceException {
+        Player player = persistance.getPlayer(playerId);
+        persistance.deletePlayer(player);
+    }
+
+    @Override
+    public void deletePlayers() throws CargoMazePersistanceException {
+        persistance.deletePlayers();
+    }
+
+    @Override
+    public Player addNewPlayerToGame(String nickname, String gameSessionId) throws CargoMazePersistanceException {
         GameSession session = persistance.getSession(gameSessionId);
         Player player = persistance.getPlayer(nickname);
         if (player == null) {
@@ -57,14 +67,14 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
             session.setStatus(GameStatus.IN_PROGRESS);
         }
         persistance.updateGameSession(session);
-        persistance.updatePlayer(player);
+        return persistance.updatePlayer(player);
     }
 
     @Override
-    public void removePlayerFromGame(String nickname, String gameSessionId) throws CargoMazePersistanceException {
+    public Player removePlayerFromGame(String nickname, String gameSessionId) throws CargoMazePersistanceException {
         Player player = getPlayerById(nickname);
         GameSession session = persistance.getSession(gameSessionId);
-        if (!player.getGameSession().equals(gameSessionId)) {
+        if (player.getGameSession().equals(gameSessionId)) {
             session.removePlayer(player);
             if (session.getPlayerCount() == 0) {
                 if (!session.getStatus().equals(GameStatus.RESETING_GAME)) {
@@ -73,21 +83,21 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
                 session.setStatus(GameStatus.WAITING_FOR_PLAYERS);
             }
             persistance.updateGameSession(session);
-            persistance.updatePlayer(player);
+            return persistance.updatePlayer(player);
         }
         else{
             throw new CargoMazePersistanceException(CargoMazePersistanceException.PLAYER_NOT_IN_SESSION);
         }
-    }
+    } 
 
     @Override
-    public void resetGameSession(String gameSessionId) throws CargoMazePersistanceException, CargoMazeServicesException {
+    public GameSession resetGameSession(String gameSessionId) throws CargoMazePersistanceException, CargoMazeServicesException {
         GameSession session = persistance.getSession(gameSessionId);
         if (!session.getStatus().equals(GameStatus.COMPLETED)) {
             throw new CargoMazeServicesException(CargoMazeServicesException.SESSION_IS_NOT_FINISHED);
         }
         session.resetGame();
-        persistance.updateGameSession(session);
+        return persistance.updateGameSession(session);
     }
 
     @Override
@@ -96,9 +106,14 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
     }
 
     @Override
-    public void createSession(String sessionId) throws CargoMazePersistanceException {
+    public boolean isGameFinished(String gameSessionid) throws CargoMazePersistanceException {
+        return persistance.getSession(gameSessionid).getStatus().equals(GameStatus.COMPLETED);
+    }
+
+    @Override
+    public GameSession createSession(String sessionId) throws CargoMazePersistanceException {
         GameSession session = new GameSession(sessionId);
-        persistance.addSession(session);
+        return persistance.addSession(session);
     }
 
     @Override
@@ -109,6 +124,11 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
     @Override
     public Player getPlayerById(String playerId) throws CargoMazePersistanceException {
         return persistance.getPlayer(playerId);
+    }
+
+    @Override
+    public List<Player> getPlayers() throws CargoMazePersistanceException {
+        return persistance.getPlayers();
     }
 
     @Override
@@ -123,7 +143,7 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
 
     @Override
     public boolean move(String playerId, String gameSessionId, Position direction) throws CargoMazePersistanceException, CargoMazeServicesException {
-        Player player = persistance.getPlayerInSession(playerId, gameSessionId);
+        Player player = persistance.getPlayerInSession(gameSessionId, playerId );
         GameSession gameSession = persistance.getSession(gameSessionId);
         if (!gameSession.getStatus().equals(GameStatus.IN_PROGRESS)) {
             throw new CargoMazeServicesException(CargoMazeServicesException.SESSION_IS_NOT_IN_PROGRESS);
@@ -230,3 +250,4 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
     }
 
 }
+

@@ -3,6 +3,7 @@ package com.cargomaze.cargo_maze.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+
 @Document
 public class Player{
     @Id
@@ -51,5 +52,17 @@ public class Player{
 
     public String getGameSession() {
         return gameSessionId;
+    }
+
+    @Override 
+    public boolean equals(Object obj){
+        if(obj == this){
+            return true;
+        }
+        if(!(obj instanceof Player)){
+            return false;
+        }
+        Player player = (Player) obj;
+        return player.getNickname().equals(nickname);
     }
 }

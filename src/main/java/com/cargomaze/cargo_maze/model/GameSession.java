@@ -87,9 +87,17 @@ public class GameSession {
         return board.getBoardState();
     }
 
+    public void setPlayers(List<Player> players) {
+        this.players = players;
+    }
+
+    public void setBoard(Board board) {
+        this.board = board;
+    }
+
     public void removePlayer(Player player) {
         board.setCellState(player.getPosition(), Cell.EMPTY);
-        players.remove(player);
+        System.out.println(players.remove(player));
         indexes.add(player.getIndex());
         player.setIndex(-1);
         player.updatePosition(null);
@@ -101,3 +109,4 @@ public class GameSession {
         //indexes.addAll(Arrays.asList(0, 1, 2, 3));
     }
 }
+
