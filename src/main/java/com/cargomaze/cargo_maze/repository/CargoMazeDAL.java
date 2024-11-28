@@ -25,12 +25,14 @@ public interface CargoMazeDAL {
 
     public List<Player> getPlayersInSession(String id) throws CargoMazePersistanceException;
 
-    public void updatePlayer(String playerId) throws CargoMazePersistanceException;
+    public void updatePlayerById(String playerId) throws CargoMazePersistanceException;
 
-    public void updateGameSession(String sessionId) throws CargoMazePersistanceException;
+    public void updatePlayer(Player player) throws CargoMazePersistanceException;
+
+    public void updateGameSessionById(String sessionId) throws CargoMazePersistanceException;
+
+    public void updateGameSession(GameSession session) throws CargoMazePersistanceException;
 
     public void deletePlayer(String playerId) throws CargoMazePersistanceException;   
-
-    public void removePlayerFromSession(String playerId, String sessionId) throws CargoMazePersistanceException;
 
 }

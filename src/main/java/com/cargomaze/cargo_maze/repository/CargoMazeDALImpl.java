@@ -99,7 +99,7 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
     }
 
     @Override
-    public void updatePlayer(String playerId) throws CargoMazePersistanceException {
+    public void updatePlayerById(String playerId) throws CargoMazePersistanceException {
         Query query = new Query(Criteria.where(PLAYER_ID).is(playerId));
         Player playerInDataBase = mongoTemplate.findOne(query, Player.class);
         if (playerInDataBase == null) {
@@ -111,7 +111,12 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
     }
 
     @Override
-    public void updateGameSession(String sessionId) throws CargoMazePersistanceException {
+    public void updatePlayer(Player player) throws CargoMazePersistanceException{
+        mongoTemplate.save(player);
+    }
+
+    @Override
+    public void updateGameSessionById(String sessionId) throws CargoMazePersistanceException {
         Query query = new Query(Criteria.where(GAME_SESSION_ID).is(sessionId));
         GameSession sessionInDataBase = mongoTemplate.findOne(query, GameSession.class);
         if (sessionInDataBase == null) {
@@ -123,16 +128,18 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
     }
 
     @Override
-    public void deletePlayer(String playerId) throws CargoMazePersistanceException {
-
-        throw new UnsupportedOperationException("Unimplemented method 'deletePlayer'");
+    public void updateGameSession(GameSession gameSession) throws CargoMazePersistanceException{
+        mongoTemplate.save(gameSession);
     }
 
     @Override
-    public void removePlayerFromSession(String playerId, String sessionId) throws CargoMazePersistanceException {
-
-        throw new UnsupportedOperationException("Unimplemented method 'removePlayerFromSession'");
+    public void deletePlayer(String playerId) throws CargoMazePersistanceException {
+        Query query = new Query(Criteria.where(PLAYER_ID).is(playerId));
+        Player player = mongoTemplate.findOne(query, Player.class);
+        if (player == null) {
+            throw new CargoMazePersistanceException(CargoMazePersistanceException.PLAYER_NOT_FOUND);
+        }
+        mongoTemplate.remove(query, Player.class);
     }
-
 
 }

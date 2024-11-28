@@ -11,7 +11,7 @@ import com.cargomaze.cargo_maze.services.exceptions.CargoMazeServicesException;
 public interface CargoMazeServices {
     void createPlayer(String nickname) throws CargoMazePersistanceException;
 
-    Player getPlayer(String playerId) throws CargoMazePersistanceException;
+    Player getPlayerById(String playerId) throws CargoMazePersistanceException;
 
     List<Player> getPlayersInSession(String gameSessionId) throws CargoMazePersistanceException;
 

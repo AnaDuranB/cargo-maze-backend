@@ -67,7 +67,7 @@ public class CargoMazeController {
 
     public ResponseEntity<?> getPlayer(@PathVariable String nickName) {
         try {
-            return new ResponseEntity<>(cargoMazeServices.getPlayer(nickName),HttpStatus.ACCEPTED);
+            return new ResponseEntity<>(cargoMazeServices.getPlayerById(nickName),HttpStatus.ACCEPTED);
         } catch (CargoMazePersistanceException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
         }        
