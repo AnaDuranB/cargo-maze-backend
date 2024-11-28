@@ -1,8 +1,12 @@
 package com.cargomaze.cargo_maze.model;
 
 import java.util.concurrent.locks.ReentrantLock;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
+@Document
 public class Cell {
+    @Id
     public static final String EMPTY =  "EMPTY";
     public static final String TARGET =  "TARGET";
     public static final String WALL =  "WALL";

@@ -2,9 +2,7 @@ package com.cargomaze.cargo_maze.services;
 
 import com.cargomaze.cargo_maze.persistance.exceptions.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-
 import com.cargomaze.cargo_maze.model.Board;
 import com.cargomaze.cargo_maze.model.Box;
 import com.cargomaze.cargo_maze.model.Cell;
@@ -12,27 +10,18 @@ import com.cargomaze.cargo_maze.model.GameSession;
 import com.cargomaze.cargo_maze.model.GameStatus;
 import com.cargomaze.cargo_maze.model.Player;
 import com.cargomaze.cargo_maze.model.Position;
-import com.cargomaze.cargo_maze.persistance.impl.InMemoryCargoMazePersistance;
-import com.cargomaze.cargo_maze.repository.CargoMazeRepository;
+import com.cargomaze.cargo_maze.repository.CargoMazeDAL;
 import com.cargomaze.cargo_maze.services.exceptions.CargoMazeServicesException;
-
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 
 @Service
 public class CargoMazeServicesImpl implements CargoMazeServices {
-    /*InMemoryCargoMazePersistance persistance;
-
+    
+    private final CargoMazeDAL persistance;
     @Autowired
-    @Qualifier("inMemoryCargoMazePersistance")
-    public void setPersistance(InMemoryCargoMazePersistance persistance) {
-        this.persistance = persistance;
-    }*/
-
-    private final CargoMazeRepository persistance;
-    @Autowired
-    public CargoMazeServicesImpl(CargoMazeRepository persistance){
+    public CargoMazeServicesImpl(CargoMazeDAL persistance){
         this.persistance = persistance;
     }
 
@@ -128,7 +117,7 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
 
     @Override
     public boolean move(String playerId, String gameSessionId, Position direction) throws CargoMazePersistanceException, CargoMazeServicesException{
-        Player player = persistance.getPlayer(playerId, gameSessionId);
+        Player player = persistance.getPlayerInSession(playerId, gameSessionId);
         GameSession gameSession = persistance.getSession(gameSessionId); 
         if (!gameSession.getStatus().equals(GameStatus.IN_PROGRESS)) {
             throw new CargoMazeServicesException(CargoMazeServicesException.SESSION_IS_NOT_IN_PROGRESS);

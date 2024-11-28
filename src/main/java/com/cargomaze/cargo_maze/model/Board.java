@@ -5,8 +5,10 @@ import java.util.List;
 import java.util.UUID;
 
 public class Board {
+
+    private String id;
     private static final int WIDTH = 15;
-    private static final int HEIGHT = 10;
+    private  static final int HEIGHT = 10;
     private Cell[][] cells;
     private List<Position> targetPositions;
     private List<Box> boxes;
@@ -216,5 +218,25 @@ public class Board {
         boxes.clear();
         playerStartPositions.clear();
         initializeBoard();
+    }
+
+    public int getWIDTH() {
+        return WIDTH;
+    }
+
+    public int getHEIGHT() {
+        return HEIGHT;
+    }
+
+    public Cell[][] getCells(){
+        return cells;
+    }
+    
+    public List<Position> getPlayerStartPositions(){
+        return playerStartPositions;
+    }
+    
+    public String getId(){
+        return id;
     }
 }

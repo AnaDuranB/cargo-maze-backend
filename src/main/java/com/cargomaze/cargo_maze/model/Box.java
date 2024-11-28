@@ -3,6 +3,8 @@ package com.cargomaze.cargo_maze.model;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Box {
+    
+
     private String id;
     private Position position;
     private boolean isAtTarget;

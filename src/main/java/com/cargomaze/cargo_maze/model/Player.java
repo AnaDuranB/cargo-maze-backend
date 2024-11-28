@@ -1,8 +1,13 @@
 package com.cargomaze.cargo_maze.model;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document
 public class Player{
-    private int index;
+    @Id
     private String nickname;
+    private int index;
     private Position position;
     private boolean isReady;
     private String gameSessionId = null; // no se sabe si es necesario (si se crean servicios directos del game session en teoria no)

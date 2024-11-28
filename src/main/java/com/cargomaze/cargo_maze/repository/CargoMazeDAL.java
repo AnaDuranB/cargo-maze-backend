@@ -8,14 +8,14 @@ import com.cargomaze.cargo_maze.model.GameSession;
 import com.cargomaze.cargo_maze.model.Player;
 import com.cargomaze.cargo_maze.persistance.exceptions.CargoMazePersistanceException;
 
-@Repository
-public interface CargoMazeRepository {
+
+public interface CargoMazeDAL {
 
     public void addPlayer(Player player) throws CargoMazePersistanceException;
 
     public Player getPlayer(String playerId) throws CargoMazePersistanceException;
 
-    public Player getPlayer(String playerId, String gameSession) throws CargoMazePersistanceException;
+    public Player getPlayerInSession(String playerId, String gameSessionId) throws CargoMazePersistanceException;
 
     public void addSession(GameSession session) throws CargoMazePersistanceException;
 
@@ -24,4 +24,13 @@ public interface CargoMazeRepository {
     public int getPlayerCount(String gameSessionId) throws CargoMazePersistanceException;
 
     public List<Player> getPlayersInSession(String id) throws CargoMazePersistanceException;
+
+    public void updatePlayer(String playerId) throws CargoMazePersistanceException;
+
+    public void updateGameSession(String sessionId) throws CargoMazePersistanceException;
+
+    public void deletePlayer(String playerId) throws CargoMazePersistanceException;   
+
+    public void removePlayerFromSession(String playerId, String sessionId) throws CargoMazePersistanceException;
+
 }
