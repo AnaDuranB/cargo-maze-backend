@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.cargomaze.cargo_maze.services.CargoMazeServicesImpl;
+import com.cargomaze.cargo_maze.services.CargoMazeServices;
 import com.cargomaze.cargo_maze.services.exceptions.CargoMazeServicesException;
 
 import java.util.List;
@@ -20,10 +20,10 @@ import java.util.Map;
 @RequestMapping("/cargoMaze")
 public class CargoMazeController {
 
-    private final CargoMazeServicesImpl cargoMazeServices;
+    private final CargoMazeServices cargoMazeServices;
     
     @Autowired
-    public CargoMazeController(CargoMazeServicesImpl cargoMazeServices){
+    public CargoMazeController(CargoMazeServices cargoMazeServices){
         this.cargoMazeServices = cargoMazeServices;
     }
 
