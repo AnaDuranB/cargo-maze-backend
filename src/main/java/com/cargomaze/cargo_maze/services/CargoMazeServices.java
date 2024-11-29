@@ -38,6 +38,8 @@ public interface CargoMazeServices {
     boolean move(String playerId, String gameSessionId, Position direction) throws CargoMazePersistanceException, CargoMazeServicesException;
 
     boolean isGameFinished(String gameSessionid) throws CargoMazePersistanceException;
+
+    void removePlayersFromSession(String gameSessionId) throws CargoMazePersistanceException;
     
     
 }

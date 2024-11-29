@@ -45,6 +45,15 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
         persistance.deletePlayers();
     }
 
+    @Override 
+    public void removePlayersFromSession(String sessionId) throws CargoMazePersistanceException{
+        GameSession session = persistance.getSession(sessionId);
+        for(Player p: session.getPlayers()){
+            session.removePlayer(p);
+        }
+
+    }
+
     @Override
     public Player addNewPlayerToGame(String nickname, String gameSessionId) throws CargoMazePersistanceException {
         GameSession session = persistance.getSession(gameSessionId);
