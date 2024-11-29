@@ -12,6 +12,8 @@ import com.cargomaze.cargo_maze.model.Player;
 import com.cargomaze.cargo_maze.model.Position;
 import com.cargomaze.cargo_maze.repository.CargoMazeDAL;
 import com.cargomaze.cargo_maze.services.exceptions.CargoMazeServicesException;
+
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -37,20 +39,27 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
     @Override
     public void deletePlayer(String playerId) throws CargoMazePersistanceException {
         Player player = persistance.getPlayer(playerId);
+        String playerSession = player.getGameSession();
+        if( playerSession != null){
+            removePlayerFromGame(playerId, playerSession);
+        }
         persistance.deletePlayer(player);
     }
 
     @Override
     public void deletePlayers() throws CargoMazePersistanceException {
-        persistance.deletePlayers();
+        for(Player p: persistance.getPlayers()){
+            deletePlayer(p.getNickname());
+        }
     }
 
     @Override 
     public void removePlayersFromSession(String sessionId) throws CargoMazePersistanceException{
         GameSession session = persistance.getSession(sessionId);
         List<Player> players = session.getPlayers();
+        session.setPlayers(new LinkedList<>()); 
         for(Player p: players){
-            removePlayerFromGame(p, session);
+            removePlayerFromGame(p.getNickname(), session.getSessionId());
         }
 
     }
@@ -75,19 +84,6 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
 
         if (session.getPlayers().size() == 4 && session.getPlayers().stream().allMatch(Player::isReady)) {
             session.setStatus(GameStatus.IN_PROGRESS);
-        }
-        persistance.updateGameSession(session);
-        return persistance.updatePlayer(player);
-    }
-
-    @Override 
-    public Player removePlayerFromGame(Player player, GameSession session) throws CargoMazePersistanceException{
-        session.removePlayer(player);
-        if(session.getPlayerCount() == 0) {
-            if (!session.getStatus().equals(GameStatus.RESETING_GAME)) {
-                session.resetGame();
-            }
-            session.setStatus(GameStatus.WAITING_FOR_PLAYERS);
         }
         persistance.updateGameSession(session);
         return persistance.updatePlayer(player);
