@@ -26,6 +26,8 @@ public interface CargoMazeServices {
     Player addNewPlayerToGame(String nickname, String gameSessionId) throws CargoMazePersistanceException;
 
     Player removePlayerFromGame(String nickname, String gameSessionId) throws CargoMazePersistanceException;
+    
+    Player removePlayerFromGame(Player player, GameSession session) throws CargoMazePersistanceException;
 
     GameSession createSession(String sessionId) throws CargoMazePersistanceException;
 

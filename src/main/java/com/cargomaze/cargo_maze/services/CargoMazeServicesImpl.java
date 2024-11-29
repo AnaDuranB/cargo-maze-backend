@@ -48,8 +48,9 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
     @Override 
     public void removePlayersFromSession(String sessionId) throws CargoMazePersistanceException{
         GameSession session = persistance.getSession(sessionId);
-        for(Player p: session.getPlayers()){
-            session.removePlayer(p);
+        List<Player> players = session.getPlayers();
+        for(Player p: players){
+            removePlayerFromGame(p, session);
         }
 
     }
@@ -74,6 +75,19 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
 
         if (session.getPlayers().size() == 4 && session.getPlayers().stream().allMatch(Player::isReady)) {
             session.setStatus(GameStatus.IN_PROGRESS);
+        }
+        persistance.updateGameSession(session);
+        return persistance.updatePlayer(player);
+    }
+
+    @Override 
+    public Player removePlayerFromGame(Player player, GameSession session) throws CargoMazePersistanceException{
+        session.removePlayer(player);
+        if(session.getPlayerCount() == 0) {
+            if (!session.getStatus().equals(GameStatus.RESETING_GAME)) {
+                session.resetGame();
+            }
+            session.setStatus(GameStatus.WAITING_FOR_PLAYERS);
         }
         persistance.updateGameSession(session);
         return persistance.updatePlayer(player);
