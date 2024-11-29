@@ -185,5 +185,14 @@ public class CargoMazeController {
         }
     }
 
+    @PutMapping("/session/{sessionId}/players")
+    public ResponseEntity<?> removePlayersFromSession(@PathVariable String sessionId) {
+        try {
+            cargoMazeServices.removePlayersFromSession(sessionId);
+            return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+        } catch (CargoMazePersistanceException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+        }
+    }
 
 }

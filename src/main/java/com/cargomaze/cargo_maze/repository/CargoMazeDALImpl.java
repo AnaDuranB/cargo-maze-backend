@@ -95,9 +95,13 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
     }
 
     @Override
-    public GameSession getSession(String sessionId) {
+    public GameSession getSession(String sessionId) throws CargoMazePersistanceException {
         Query query = new Query(Criteria.where(GAME_SESSION_ID).is(sessionId));
-        return mongoTemplate.findOne(query, GameSession.class);
+        GameSession sessionInDB = mongoTemplate.findOne(query, GameSession.class);
+        if(sessionInDB == null){
+            throw new CargoMazePersistanceException(CargoMazePersistanceException.GAME_SESSION_NOT_FOUND);
+        }
+        return sessionInDB;
     }
 
     @Override

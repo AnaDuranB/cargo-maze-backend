@@ -26,6 +26,8 @@ public interface CargoMazeServices {
     Player addNewPlayerToGame(String nickname, String gameSessionId) throws CargoMazePersistanceException;
 
     Player removePlayerFromGame(String nickname, String gameSessionId) throws CargoMazePersistanceException;
+    
+    Player removePlayerFromGame(Player player, GameSession session) throws CargoMazePersistanceException;
 
     GameSession createSession(String sessionId) throws CargoMazePersistanceException;
 
@@ -38,6 +40,8 @@ public interface CargoMazeServices {
     boolean move(String playerId, String gameSessionId, Position direction) throws CargoMazePersistanceException, CargoMazeServicesException;
 
     boolean isGameFinished(String gameSessionid) throws CargoMazePersistanceException;
+
+    void removePlayersFromSession(String gameSessionId) throws CargoMazePersistanceException;
     
     
 }
