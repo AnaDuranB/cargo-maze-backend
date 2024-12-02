@@ -105,7 +105,8 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
             return persistance.updatePlayer(player);
         }
         else{
-            throw new CargoMazePersistanceException(CargoMazePersistanceException.PLAYER_NOT_IN_SESSION);
+            return player;
+            //throw new CargoMazePersistanceException(CargoMazePersistanceException.PLAYER_NOT_IN_SESSION);
         }
     } 
 
