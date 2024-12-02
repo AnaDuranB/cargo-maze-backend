@@ -41,7 +41,15 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
         Player player = persistance.getPlayer(playerId);
         String playerSession = player.getGameSession();
         if( playerSession != null){
-            removePlayerFromGame(playerId, playerSession);
+            GameSession session = persistance.getSession(playerSession);
+            session.removePlayer(player);
+            if (session.getPlayerCount() == 0) {
+                if (!session.getStatus().equals(GameStatus.RESETING_GAME)) {
+                    session.resetGame();
+                }
+                session.setStatus(GameStatus.WAITING_FOR_PLAYERS);
+            }
+            persistance.updateGameSession(session);
         }
         persistance.deletePlayer(player);
     }
