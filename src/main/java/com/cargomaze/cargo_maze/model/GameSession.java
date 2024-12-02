@@ -101,6 +101,8 @@ public class GameSession {
         indexes.add(player.getIndex());
         player.setIndex(-1);
         player.updatePosition(null);
+        player.setGameSession(null);
+        player.setReady(false);
     }
 
     public void resetGame(){

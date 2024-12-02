@@ -3,6 +3,8 @@ package com.cargomaze.cargo_maze.services;
 import com.cargomaze.cargo_maze.persistance.exceptions.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.cargomaze.cargo_maze.model.Board;
 import com.cargomaze.cargo_maze.model.Box;
 import com.cargomaze.cargo_maze.model.Cell;
