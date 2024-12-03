@@ -25,41 +25,39 @@ public class TransactionsServicesImpl implements TransactionsServices {
     public TransactionsServicesImpl(CargoMazeDAL persistance) {
         this.persistance = persistance;
     }
-    
-    @Override
-    public boolean movePlayer(String playerId, Position newPosition, String gameSessionId) throws CargoMazePersistanceException {
-        Player player = persistance.getPlayerInSession(gameSessionId, playerId);
+
+    @Transactional
+    public boolean movePlayer(Player player, Position newPosition, GameSession session) throws CargoMazePersistanceException {
         Position currentPos = player.getPosition();
-        Board board = persistance.getSession(gameSessionId).getBoard();
+        Board board = session.getBoard();
         if (isValidPlayerMove(currentPos, newPosition, board)) {
             if (board.hasBoxAt(newPosition)) {
-                boolean moveBox = moveBox(player, currentPos, newPosition, board, gameSessionId);
+                boolean moveBox = moveBox(player, currentPos, newPosition, board, session);
                 if (!moveBox) {
                     return false;
                 }
             }
-            return movePlayer(player, board, newPosition, currentPos, gameSessionId);
+            return movePlayer(player, board, newPosition, currentPos, session, session.getSessionId());
         }
         return false;
     }
 
     @Transactional
-    public boolean movePlayer(Player player, Board board, Position newPosition, Position currentPos, String gameSessionId) {
+    public boolean movePlayer(Player player, Board board, Position newPosition, Position currentPos, GameSession session, String sessionId) {
         try {  
-            Cell cell1 = getCellAt(gameSessionId, currentPos.getX(), currentPos.getY());
-            cell1.setState(Cell.EMPTY);
-            Cell cell2 = getCellAt(gameSessionId, newPosition.getX(), newPosition.getY());
-            cell2.setState(Cell.PLAYER);
-
             player.updatePosition(newPosition);
             updatePlayer(player);
 
+            Cell cell1 = getCellAt(sessionId, currentPos.getX(), currentPos.getY());
+            cell1.setState(Cell.EMPTY);
+            Cell cell2 = getCellAt(sessionId, newPosition.getX(), newPosition.getY());
+            cell2.setState(Cell.PLAYER);
+
             board.setCellAt(currentPos, cell1);
             board.setCellAt(newPosition, cell2);
-
-            persistance.getSession(gameSessionId).setBoard(board);
-            updateGameSession(persistance.getSession(gameSessionId));
-
+            session.setBoard(board);
+            updateGameSession(session);
+            ;
         } catch (Exception e) {
             return false;
         }
@@ -67,8 +65,9 @@ public class TransactionsServicesImpl implements TransactionsServices {
     }
 
     @Transactional
-    public boolean moveBox(Player player, Position playerPosition, Position boxPosition, Board board, String gameSessionId) throws CargoMazePersistanceException {
+    public boolean moveBox(Player player, Position playerPosition, Position boxPosition, Board board, GameSession session) throws CargoMazePersistanceException {
         Position boxNewPosition = getPositionFromMovingABox(boxPosition, playerPosition); // Validates all postions (in
+        String gameSessionId = session.getSessionId();
         Box box = persistance.getBox(gameSessionId, persistance.getSession(gameSessionId).getBoard().getBoxAt(boxPosition).getId());
         if (isValidBoxMove(player, box, boxNewPosition, board)) { // va mover la caja
             try {
@@ -79,7 +78,7 @@ public class TransactionsServicesImpl implements TransactionsServices {
                             .filter(b -> !b.equals(box))
                             .allMatch(Box::isAtTarget);
                     if (allOtherBoxesAtTarget) {
-                        persistance.getSession(gameSessionId).setStatus(GameStatus.COMPLETED);
+                        session.setStatus(GameStatus.COMPLETED);
                     }
                 } // si la caja esta en un target
                 else if (board.isTargetAt(boxPosition)) {
@@ -88,8 +87,7 @@ public class TransactionsServicesImpl implements TransactionsServices {
                 Cell cell1 = getCellAt(gameSessionId, boxNewPosition.getX(), boxNewPosition.getY());
                 cell1.setState(Cell.BOX);
                 board.setCellAt(boxNewPosition, cell1);
-                persistance.getSession(gameSessionId).setBoard(board);
-
+                session.setBoard(board);
                 updateGameSession(persistance.getSession(gameSessionId));
             } 
             catch (Exception e) {

@@ -15,6 +15,7 @@ import com.cargomaze.cargo_maze.model.Player;
 import com.cargomaze.cargo_maze.persistance.exceptions.CargoMazePersistanceException;
 
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.mongodb.core.query.Criteria;
 
@@ -44,7 +45,6 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
             throw new CargoMazePersistanceException(CargoMazePersistanceException.GAME_SESSION_NOT_FOUND);
         }
         int playerCount = session.getPlayerCount();
-        System.out.println("Player count: " + playerCount);
         return playerCount;
     }
 
@@ -55,7 +55,6 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
         if (player == null) {
             throw new CargoMazePersistanceException(CargoMazePersistanceException.PLAYER_NOT_FOUND);
         }
-        System.out.println("Player session: " + player.getGameSession() + " Session ID: " + sessionId);
         if (player.getGameSession() == null || !player.getGameSession().equals(sessionId)) {
             throw new CargoMazePersistanceException(CargoMazePersistanceException.PLAYER_NOT_IN_SESSION);
         }
@@ -164,8 +163,8 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
     }
 
     @Override
-    public GameSession updateGameSession(GameSession gameSession) throws CargoMazePersistanceException {
-        return mongoTemplate.save(gameSession);
+    public GameSession updateGameSession(GameSession session) throws CargoMazePersistanceException {
+        return mongoTemplate.save(session);
     }
 
     @Override

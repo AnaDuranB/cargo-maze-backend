@@ -192,6 +192,6 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
             throw new CargoMazeServicesException(CargoMazeServicesException.SESSION_IS_NOT_IN_PROGRESS);
         }
         Position newPosition = new Position(player.getPosition().getX() + direction.getX(),player.getPosition().getY() + direction.getY());
-        return transactionsServices.movePlayer(playerId, newPosition, gameSessionId);
+        return transactionsServices.movePlayer(player, newPosition, gameSession);
     }
 }
