@@ -32,7 +32,7 @@ public class TransactionsServicesImpl implements TransactionsServices {
         Board board = session.getBoard();
         if (isValidPlayerMove(currentPos, newPosition, board)) {
             if (board.hasBoxAt(newPosition)) {
-                boolean moveBox = moveBox(player, currentPos, newPosition, board, session);
+                boolean moveBox = moveBox(player, currentPos, newPosition, board, board.getBoxAt(newPosition),session);
                 if (!moveBox) {
                     return false;
                 }
@@ -57,7 +57,7 @@ public class TransactionsServicesImpl implements TransactionsServices {
             board.setCellAt(newPosition, cell2);
             session.setBoard(board);
             updateGameSession(session);
-            ;
+            
         } catch (Exception e) {
             return false;
         }
@@ -65,10 +65,9 @@ public class TransactionsServicesImpl implements TransactionsServices {
     }
 
     @Transactional
-    public boolean moveBox(Player player, Position playerPosition, Position boxPosition, Board board, GameSession session) throws CargoMazePersistanceException {
+    public boolean moveBox(Player player, Position playerPosition, Position boxPosition, Board board, Box box,GameSession session) throws CargoMazePersistanceException {
         Position boxNewPosition = getPositionFromMovingABox(boxPosition, playerPosition); // Validates all postions (in
         String gameSessionId = session.getSessionId();
-        Box box = persistance.getBox(gameSessionId, persistance.getSession(gameSessionId).getBoard().getBoxAt(boxPosition).getId());
         if (isValidBoxMove(player, box, boxNewPosition, board)) { // va mover la caja
             try {
                 box.move(boxNewPosition); // se cambia el lugar donde esta la caja

@@ -13,7 +13,7 @@ import com.cargomaze.cargo_maze.persistance.exceptions.CargoMazePersistanceExcep
 public interface TransactionsServices {
     boolean movePlayer(Player player, Position newPosition, GameSession gameSessionId) throws CargoMazePersistanceException;
     
-    boolean moveBox(Player player, Position playerPosition, Position boxPosition, Board board, GameSession session) throws CargoMazePersistanceException;
+    boolean moveBox(Player player, Position playerPosition, Position boxPosition, Board board, Box box,GameSession session) throws CargoMazePersistanceException;
 
     void updateGameSession(GameSession gameSession) throws CargoMazePersistanceException;
     
