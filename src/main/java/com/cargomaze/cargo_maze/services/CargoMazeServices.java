@@ -3,6 +3,7 @@ package com.cargomaze.cargo_maze.services;
 import java.util.List;
 
 import com.cargomaze.cargo_maze.model.Box;
+import com.cargomaze.cargo_maze.model.Cell;
 import com.cargomaze.cargo_maze.model.GameSession;
 import com.cargomaze.cargo_maze.model.Player;
 import com.cargomaze.cargo_maze.model.Position;
@@ -45,6 +46,8 @@ public interface CargoMazeServices {
     Box getBox(String gameSessionId, String boxId) throws CargoMazePersistanceException;
 
     List<Box> getBoxes(String gameSessionId) throws CargoMazePersistanceException;
+
+    Cell getCellAt(String gameSessionId, int x, int y) throws CargoMazePersistanceException;
 
     
     

@@ -1,7 +1,6 @@
 package com.cargomaze.cargo_maze.model;
 
 import java.util.UUID;
-import java.util.concurrent.locks.ReentrantLock;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 

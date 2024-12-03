@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.aggregation.ArrayOperators;
 
 import com.cargomaze.cargo_maze.model.Box;
 import com.cargomaze.cargo_maze.model.Cell;
@@ -193,35 +194,21 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
 
     @Override
     public Box getBox(String gameSessionId, String boxId) throws CargoMazePersistanceException {
-        // Validación de parámetros
-        if (gameSessionId == null || gameSessionId.isEmpty()) {
-            throw new IllegalArgumentException("El gameSessionId no puede ser nulo ni vacío.");
-        }
-        if (boxId == null || boxId.isEmpty()) {
-            throw new IllegalArgumentException("El boxId no puede ser nulo ni vacío.");
-        }
-
-    // Crear el pipeline de agregación utilizando la API de Aggregation
-    Aggregation aggregation = Aggregation.newAggregation(
-        // Filtrar por el gameSessionId
-        Aggregation.match(Criteria.where("_id").is(gameSessionId)),
-        
-        // Descomponer el array 'board.boxes'
-        Aggregation.unwind("$board.boxes"),
-        
-        // Filtrar por el boxId
-        Aggregation.match(Criteria.where("board.boxes._id").is(boxId)),
-        
-        // Reemplazar la raíz con el objeto de la caja
-        Aggregation.replaceRoot("$board.boxes")
-    );
+        Aggregation aggregation = Aggregation.newAggregation(
+            // Filtrar por el gameSessionId
+            Aggregation.match(Criteria.where("_id").is(gameSessionId)),
+            // Descomponer el array 'board.boxes'
+            Aggregation.unwind("$board.boxes"),
+            // Filtrar por el boxId
+            Aggregation.match(Criteria.where("board.boxes._id").is(boxId)),
+            // Reemplazar la raíz con el objeto de la caja
+            Aggregation.replaceRoot("$board.boxes")
+        );
 
         // Ejecutar la consulta
         AggregationResults<Box> result = mongoTemplate.aggregate(aggregation, "gameSession", Box.class);
-
         // Obtener el resultado único
         Box box = result.getUniqueMappedResult();
-
         // Si no se encuentra el box, lanzamos una excepción personalizada
         if (box == null) {
             throw new CargoMazePersistanceException(CargoMazePersistanceException.BOX_NOT_FOUND);
@@ -259,7 +246,30 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
     }
 
     @Override
-    public Cell getCell(String gameSessionId, String cellId) throws CargoMazePersistanceException {
-        throw new UnsupportedOperationException("Unimplemented method 'getCell'");
+    public Cell getCellAt(String gameSessionId, int x, int y) throws CargoMazePersistanceException {
+        // Crear el pipeline de agregación
+        Aggregation aggregation = Aggregation.newAggregation(
+            // Filtrar por el ID de la sesión
+            Aggregation.match(Criteria.where("_id").is(gameSessionId)),
+            // Proyectar para obtener el primer elemento de "board.cells"
+            Aggregation.project()
+                .and(ArrayOperators.ArrayElemAt.arrayOf("$board.cells").elementAt(0)).as("cells"),
+            // Proyectar el primer elemento de "cells" (en este caso la celda que queremos)
+            Aggregation.project()
+                .and(ArrayOperators.ArrayElemAt.arrayOf("$cells").elementAt(0)).as("cell"),
+            // Reemplazar el root por la celda encontrada
+            Aggregation.replaceRoot("cell")
+        );
+        // Ejecutar la agregación sobre la colección "gameSession" y obtener el resultado mapeado a Cell
+        AggregationResults<Cell> result = mongoTemplate.aggregate(aggregation, "gameSession", Cell.class);
+        // Obtener el único resultado mapeado
+        Cell cell = result.getUniqueMappedResult();
+        // Si no se encuentra la celda, lanzar una excepción
+        if (cell == null) {
+            throw new CargoMazePersistanceException(CargoMazePersistanceException.CELL_NOT_FOUND);
+        }
+    
+        return cell;
     }
+    
 }

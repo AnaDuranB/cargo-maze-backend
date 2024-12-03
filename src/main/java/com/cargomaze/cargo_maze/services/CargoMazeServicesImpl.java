@@ -170,6 +170,11 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
     }
 
     @Override
+    public Cell getCellAt(String gameSessionId, int x, int y) throws CargoMazePersistanceException {
+        return persistance.getCellAt(gameSessionId, x, y);
+    }
+    
+    @Override
     public int getPlayerCount(String gameSessionId) throws CargoMazePersistanceException {
         return persistance.getPlayerCount(gameSessionId);
     }
