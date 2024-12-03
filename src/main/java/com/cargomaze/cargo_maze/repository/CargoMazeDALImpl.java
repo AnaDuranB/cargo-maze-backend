@@ -253,10 +253,10 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
             Aggregation.match(Criteria.where("_id").is(gameSessionId)),
             // Proyectar para obtener el primer elemento de "board.cells"
             Aggregation.project()
-                .and(ArrayOperators.ArrayElemAt.arrayOf("$board.cells").elementAt(0)).as("cells"),
+                .and(ArrayOperators.ArrayElemAt.arrayOf("$board.cells").elementAt(x)).as("cells"),
             // Proyectar el primer elemento de "cells" (en este caso la celda que queremos)
             Aggregation.project()
-                .and(ArrayOperators.ArrayElemAt.arrayOf("$cells").elementAt(0)).as("cell"),
+                .and(ArrayOperators.ArrayElemAt.arrayOf("$cells").elementAt(y)).as("cell"),
             // Reemplazar el root por la celda encontrada
             Aggregation.replaceRoot("cell")
         );

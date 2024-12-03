@@ -20,7 +20,6 @@ public class GameSession {
         this.sessionId = sessionId;
         players = new ArrayList<>();
         status = GameStatus.WAITING_FOR_PLAYERS;
-        
         board = new Board(); //Sera una instancia inyectada (para más mapas en el futuro)
     }
 
@@ -66,6 +65,8 @@ public class GameSession {
     public String getSessionId() {
         return sessionId;
     }
+
+
 
     public List<Player> getPlayers() {
         return players;

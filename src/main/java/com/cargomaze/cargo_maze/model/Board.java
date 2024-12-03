@@ -152,6 +152,9 @@ public class Board {
         return boxes.stream().allMatch(Box::isAtTarget);
     }
 
+    public void setCellAt(Position position, Cell cell) {
+        cells[position.getX()][position.getY()] = cell;
+    }
 
     private void addTarget(Position position) {
         cells[position.getX()][position.getY()] = new Cell(Cell.TARGET);
@@ -207,6 +210,8 @@ public class Board {
     public void setCellState(Position position, String state){
         cells[position.getX()][position.getY()].setState(state);
     }
+
+
 
     public String[][] getBoardState(){
         String[][] boardState = new String[HEIGHT][WIDTH];
