@@ -99,6 +99,8 @@ public class GameSession {
     public void removePlayer(Player player) {
         board.setCellState(player.getPosition(), Cell.EMPTY);
         indexes.add(player.getIndex());
+        players.remove(player);
+        System.out.println(players.size());
         player.setIndex(-1);
         player.updatePosition(null);
         player.setGameSession(null);
