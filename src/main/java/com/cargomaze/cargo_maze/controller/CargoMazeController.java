@@ -213,7 +213,7 @@ public class CargoMazeController {
         }
     }
 
-    @GetMapping("/sessions/{id}/boxes/{x}/{y}")
+    @GetMapping("/sessions/{id}/cells/{x}/{y}")
     public ResponseEntity<?> getCellAt(@PathVariable String id, @PathVariable int x, @PathVariable int y) {
         try {
             return new ResponseEntity<>(cargoMazeServices.getCellAt(id, x, y), HttpStatus.ACCEPTED);
