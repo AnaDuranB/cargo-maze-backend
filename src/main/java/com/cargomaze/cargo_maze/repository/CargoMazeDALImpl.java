@@ -4,7 +4,11 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 
+import com.cargomaze.cargo_maze.model.Box;
+import com.cargomaze.cargo_maze.model.Cell;
 import com.cargomaze.cargo_maze.model.GameSession;
 import com.cargomaze.cargo_maze.model.Player;
 import com.cargomaze.cargo_maze.persistance.exceptions.CargoMazePersistanceException;
@@ -20,7 +24,8 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
 
     private static final String GAME_SESSION_ID = "sessionId";
     private static final String PLAYER_ID = "nickname";
-
+    private static final String BOARD_ID = "id";
+    private static final String BOX_ID = "id";
 
     @Autowired
     public CargoMazeDALImpl(MongoTemplate mongoTemplate) {
@@ -30,7 +35,7 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
     }
 
     @Override
-    public int getPlayerCount(String gameSessionId) throws CargoMazePersistanceException{
+    public int getPlayerCount(String gameSessionId) throws CargoMazePersistanceException {
         Query query = new Query(Criteria.where(GAME_SESSION_ID).is(gameSessionId));
         GameSession session = mongoTemplate.findOne(query, GameSession.class);
 
@@ -46,11 +51,11 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
     public Player getPlayerInSession(String sessionId, String playerId) throws CargoMazePersistanceException {
         Query query = new Query(Criteria.where(PLAYER_ID).is(playerId));
         Player player = mongoTemplate.findOne(query, Player.class);
-        if(player == null){
+        if (player == null) {
             throw new CargoMazePersistanceException(CargoMazePersistanceException.PLAYER_NOT_FOUND);
         }
         System.out.println("Player session: " + player.getGameSession() + " Session ID: " + sessionId);
-        if(player.getGameSession() == null || !player.getGameSession().equals(sessionId)){
+        if (player.getGameSession() == null || !player.getGameSession().equals(sessionId)) {
             throw new CargoMazePersistanceException(CargoMazePersistanceException.PLAYER_NOT_IN_SESSION);
         }
         return player;
@@ -61,7 +66,7 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
     public Player getPlayer(String playerId) throws CargoMazePersistanceException {
         Query query = new Query(Criteria.where(PLAYER_ID).is(playerId));
         Player player = mongoTemplate.findOne(query, Player.class);
-        if(player == null){
+        if (player == null) {
             throw new CargoMazePersistanceException(CargoMazePersistanceException.PLAYER_NOT_FOUND);
         }
         return player;
@@ -81,7 +86,7 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
             throw new IllegalArgumentException("Session not found with ID: " + sessionId);
         }
 
-        return session.getPlayers(); 
+        return session.getPlayers();
     }
 
     @Override
@@ -89,16 +94,16 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
         Query query = new Query(Criteria.where(GAME_SESSION_ID).is(session.getSessionId()));
         GameSession sessionInDataBase = mongoTemplate.findOne(query, GameSession.class);
         if (sessionInDataBase == null) {
-            mongoTemplate.save(session); 
+            mongoTemplate.save(session);
         }
-        return sessionInDataBase; 
+        return sessionInDataBase;
     }
 
     @Override
     public GameSession getSession(String sessionId) throws CargoMazePersistanceException {
         Query query = new Query(Criteria.where(GAME_SESSION_ID).is(sessionId));
         GameSession sessionInDB = mongoTemplate.findOne(query, GameSession.class);
-        if(sessionInDB == null){
+        if (sessionInDB == null) {
             throw new CargoMazePersistanceException(CargoMazePersistanceException.GAME_SESSION_NOT_FOUND);
         }
         return sessionInDB;
@@ -110,8 +115,7 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
         Player playerInDataBase = mongoTemplate.findOne(query, Player.class);
         if (playerInDataBase != null) {
             throw new CargoMazePersistanceException(CargoMazePersistanceException.PLAYER_ALREADY_EXISTS);
-        }
-        else{
+        } else {
             return mongoTemplate.save(player);
         }
     }
@@ -137,14 +141,13 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
         Player playerInDataBase = mongoTemplate.findOne(query, Player.class);
         if (playerInDataBase == null) {
             throw new CargoMazePersistanceException(CargoMazePersistanceException.PLAYER_NOT_FOUND);
-        }
-        else{
+        } else {
             return mongoTemplate.save(playerInDataBase);
         }
     }
 
     @Override
-    public Player updatePlayer(Player player) throws CargoMazePersistanceException{
+    public Player updatePlayer(Player player) throws CargoMazePersistanceException {
         return mongoTemplate.save(player);
     }
 
@@ -154,14 +157,13 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
         GameSession sessionInDataBase = mongoTemplate.findOne(query, GameSession.class);
         if (sessionInDataBase == null) {
             throw new CargoMazePersistanceException(CargoMazePersistanceException.GAME_SESSION_NOT_FOUND);
-        }
-        else{
+        } else {
             return mongoTemplate.save(sessionInDataBase);
         }
     }
 
     @Override
-    public GameSession updateGameSession(GameSession gameSession) throws CargoMazePersistanceException{
+    public GameSession updateGameSession(GameSession gameSession) throws CargoMazePersistanceException {
         return mongoTemplate.save(gameSession);
     }
 
@@ -188,5 +190,76 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
         player.setGameSession(null);
         mongoTemplate.save(player);
     }
-}
 
+    @Override
+    public Box getBox(String gameSessionId, String boxId) throws CargoMazePersistanceException {
+        // Validación de parámetros
+        if (gameSessionId == null || gameSessionId.isEmpty()) {
+            throw new IllegalArgumentException("El gameSessionId no puede ser nulo ni vacío.");
+        }
+        if (boxId == null || boxId.isEmpty()) {
+            throw new IllegalArgumentException("El boxId no puede ser nulo ni vacío.");
+        }
+
+    // Crear el pipeline de agregación utilizando la API de Aggregation
+    Aggregation aggregation = Aggregation.newAggregation(
+        // Filtrar por el gameSessionId
+        Aggregation.match(Criteria.where("_id").is(gameSessionId)),
+        
+        // Descomponer el array 'board.boxes'
+        Aggregation.unwind("$board.boxes"),
+        
+        // Filtrar por el boxId
+        Aggregation.match(Criteria.where("board.boxes._id").is(boxId)),
+        
+        // Reemplazar la raíz con el objeto de la caja
+        Aggregation.replaceRoot("$board.boxes")
+    );
+
+        // Ejecutar la consulta
+        AggregationResults<Box> result = mongoTemplate.aggregate(aggregation, "gameSession", Box.class);
+
+        // Obtener el resultado único
+        Box box = result.getUniqueMappedResult();
+
+        // Si no se encuentra el box, lanzamos una excepción personalizada
+        if (box == null) {
+            throw new CargoMazePersistanceException(CargoMazePersistanceException.BOX_NOT_FOUND);
+        }
+
+        return box;
+    }
+
+    @Override
+    public List<Box> getBoxes(String gameSessionId) throws CargoMazePersistanceException {
+        // Validación de parámetros
+        if (gameSessionId == null || gameSessionId.isEmpty()) {
+            throw new IllegalArgumentException("El gameSessionId no puede ser nulo ni vacío.");
+        }
+
+        // Pipeline de Aggregation para obtener todas las boxes de la sesión
+        Aggregation aggregation = Aggregation.newAggregation(
+                Aggregation.match(Criteria.where(GAME_SESSION_ID).is(gameSessionId)), // Filtra por sessionId
+                Aggregation.unwind("$board.boxes"), // Descompone el array "boxes" en documentos individuales
+                Aggregation.replaceRoot("$board.boxes") // Cambia la raíz del resultado a "board.boxes"
+        );
+
+        // Ejecutar la consulta
+        AggregationResults<Box> result = mongoTemplate.aggregate(aggregation, "gameSession", Box.class);
+
+        // Obtener los resultados en una lista
+        List<Box> boxes = result.getMappedResults();
+
+        // Si no se encuentran cajas, lanzamos una excepción personalizada
+        if (boxes.isEmpty()) {
+            throw new CargoMazePersistanceException(CargoMazePersistanceException.BOXES_NOT_FOUND);
+        }
+
+        return boxes;
+    }
+
+    @Override
+    public Cell getCell(String gameSessionId, String cellId) throws CargoMazePersistanceException {
+        throw new UnsupportedOperationException("Unimplemented method 'getCell'");
+    }
+}

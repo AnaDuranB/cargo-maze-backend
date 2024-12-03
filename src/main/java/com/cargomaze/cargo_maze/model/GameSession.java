@@ -1,6 +1,5 @@
 package com.cargomaze.cargo_maze.model;
 
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -21,6 +20,7 @@ public class GameSession {
         this.sessionId = sessionId;
         players = new ArrayList<>();
         status = GameStatus.WAITING_FOR_PLAYERS;
+        
         board = new Board(); //Sera una instancia inyectada (para más mapas en el futuro)
     }
 

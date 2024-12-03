@@ -2,6 +2,7 @@ package com.cargomaze.cargo_maze.services;
 
 import java.util.List;
 
+import com.cargomaze.cargo_maze.model.Box;
 import com.cargomaze.cargo_maze.model.GameSession;
 import com.cargomaze.cargo_maze.model.Player;
 import com.cargomaze.cargo_maze.model.Position;
@@ -40,6 +41,11 @@ public interface CargoMazeServices {
     boolean isGameFinished(String gameSessionid) throws CargoMazePersistanceException;
 
     void removePlayersFromSession(String gameSessionId) throws CargoMazePersistanceException;
+    
+    Box getBox(String gameSessionId, String boxId) throws CargoMazePersistanceException;
+
+    List<Box> getBoxes(String gameSessionId) throws CargoMazePersistanceException;
+
     
     
 }

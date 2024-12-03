@@ -255,6 +255,6 @@ public class Board {
             return false;
         }
         Board board = (Board) obj;
-        return board.id.equals(this.id);
+        return board.getId().equals(this.id);
     }
 }
