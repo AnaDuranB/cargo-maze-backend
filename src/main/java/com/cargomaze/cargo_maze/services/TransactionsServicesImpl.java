@@ -40,7 +40,7 @@ public class TransactionsServicesImpl implements TransactionsServices {
             return movePlayer(player, board, newPosition, currentPos, session, session.getSessionId());
         }
         return false;
-    }
+    } //
 
     @Transactional
     public boolean movePlayer(Player player, Board board, Position newPosition, Position currentPos, GameSession session, String sessionId) {
