@@ -1,7 +1,5 @@
 package com.cargomaze.cargo_maze.model;
 
-import java.util.concurrent.locks.ReentrantLock;
-
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -11,13 +9,11 @@ public class Box {
     private String id;
     private Position position;
     private boolean isAtTarget;
-    public final ReentrantLock lock;
 
     public Box(String id, Position position) {
         this.id = id;
         this.position = position;
         this.isAtTarget = false;
-        this.lock = new ReentrantLock();
     }
 
     public void move(Position newPosition){
@@ -49,6 +45,6 @@ public class Box {
             return false;
         }
         Box box = (Box) obj;
-        return box.id.equals(this.id);
+        return box.getId().equals(this.id);
     }
 }

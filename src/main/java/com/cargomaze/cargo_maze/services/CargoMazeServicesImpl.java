@@ -17,7 +17,6 @@ import com.cargomaze.cargo_maze.services.exceptions.CargoMazeServicesException;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.locks.ReentrantLock;
 
 @Service
 public class CargoMazeServicesImpl implements CargoMazeServices {
@@ -160,6 +159,16 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
         return persistance.getPlayers();
     }
 
+    @Override 
+    public Box getBox(String gameSessionId, String boxId) throws CargoMazePersistanceException {
+        return persistance.getBox(gameSessionId, boxId);
+    }
+
+    @Override
+    public List<Box> getBoxes(String gameSessionId) throws CargoMazePersistanceException {
+        return persistance.getBoxes(gameSessionId);
+    }
+
     @Override
     public int getPlayerCount(String gameSessionId) throws CargoMazePersistanceException {
         return persistance.getPlayerCount(gameSessionId);
@@ -197,7 +206,7 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
                     return false;
                 }
             }
-            ReentrantLock lock = board.getCellAt(newPosition).lock;
+            /*ReentrantLock lock = board.getCellAt(newPosition).lock;
             if (lock.tryLock()) { // se bloquea la celda a donde se va a mover el jugador por si alguno otro
                                   // intenta acceder a este.
                 try {
@@ -208,9 +217,10 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
                     lock.unlock();
                 }
                 return true;
-            }
+            }*/
         }
         return false;
+
     }
 
     private boolean moveBox(Player player, Position playerPosition, Position boxPosition, Board board,
@@ -219,7 +229,7 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
                                                                                           // theory);
         Box box = board.getBoxAt(boxPosition);
         if (isValidBoxMove(player, box, boxNewPosition, board)) {
-            if (box.lock.tryLock() && board.getCellAt(boxNewPosition).lock.tryLock()) { // Lockeamos tanto la caja a
+            /*if (box.lock.tryLock() && board.getCellAt(boxNewPosition).lock.tryLock()) { // Lockeamos tanto la caja a
                                                                                         // mover y la celda a donde se
                                                                                         // va mover la caja
                 try {
@@ -244,7 +254,7 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
                 return true;
             } else {
                 return false;
-            }
+            }*/
         }
         return false;
     }

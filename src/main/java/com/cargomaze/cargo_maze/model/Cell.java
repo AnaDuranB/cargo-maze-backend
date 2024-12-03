@@ -7,6 +7,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document
 public class Cell {
+    @Id
+    private String id;
     public static final String EMPTY =  "EMPTY";
     public static final String TARGET =  "TARGET";
     public static final String WALL =  "WALL";
@@ -14,15 +16,10 @@ public class Cell {
     public static final String BOX =  "BOX";
     public static final String BOX_ON_TARGET =  "BOX_ON_TARGET";
     public static final String PLAYER_ON_TARGET =  "PLAYER_ON_TARGET";
-    public final ReentrantLock lock;
     private String state = "";
-    @Id
-    private String id;
-
     public Cell(String state){
         this.state = state;
-        this.lock = new ReentrantLock();
-        this.id = UUID.randomUUID().toString();
+        id = UUID.randomUUID().toString();
     }
 
     public void setState(String newState){
@@ -44,6 +41,10 @@ public class Cell {
         return state;
     }
 
+    public String getId(){
+        return id;
+    }
+
     @Override
     public boolean equals(Object obj){
         if(obj == this){
@@ -53,6 +54,6 @@ public class Cell {
             return false;
         }
         Cell cell = (Cell) obj;
-        return cell.id.equals(this.id);
+        return cell.getId().equals(this.id);
     }
 }
