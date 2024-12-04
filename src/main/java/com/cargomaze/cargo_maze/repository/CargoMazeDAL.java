@@ -2,10 +2,7 @@ package com.cargomaze.cargo_maze.repository;
 
 import java.util.List;
 
-import com.cargomaze.cargo_maze.model.Box;
-import com.cargomaze.cargo_maze.model.Cell;
-import com.cargomaze.cargo_maze.model.GameSession;
-import com.cargomaze.cargo_maze.model.Player;
+import com.cargomaze.cargo_maze.model.*;
 import com.cargomaze.cargo_maze.persistance.exceptions.CargoMazePersistanceException;
 
 public interface CargoMazeDAL {
@@ -34,9 +31,15 @@ public interface CargoMazeDAL {
 
     Player updatePlayer(Player player) throws CargoMazePersistanceException;
 
+    Player updatePlayerPosition(String playerId, Position position) throws CargoMazePersistanceException;
+
     GameSession updateGameSessionById(String sessionId) throws CargoMazePersistanceException;
 
     GameSession updateGameSession(GameSession session) throws CargoMazePersistanceException;
+
+    GameSession updateGameSessionBoard(String sessionId, Board board) throws CargoMazePersistanceException;
+
+    GameSession updateGameSessionStatus(String sessionId, GameStatus status) throws CargoMazePersistanceException;
 
     void deletePlayer(String playerId) throws CargoMazePersistanceException;
 

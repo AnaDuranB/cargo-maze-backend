@@ -3,15 +3,13 @@ package com.cargomaze.cargo_maze.repository;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.aggregation.ArrayOperators;
 
-import com.cargomaze.cargo_maze.model.Box;
-import com.cargomaze.cargo_maze.model.Cell;
-import com.cargomaze.cargo_maze.model.GameSession;
-import com.cargomaze.cargo_maze.model.Player;
+import com.cargomaze.cargo_maze.model.*;
 import com.cargomaze.cargo_maze.persistance.exceptions.CargoMazePersistanceException;
 
 import org.springframework.data.mongodb.core.query.Query;
@@ -152,6 +150,15 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
     }
 
     @Override
+    public Player updatePlayerPosition(String playerId, Position newPosition) throws CargoMazePersistanceException {
+        Query query = new Query(Criteria.where(PLAYER_ID).is(playerId));
+        Update updatePosition = new Update().set("position", newPosition);
+        FindAndModifyOptions options = new FindAndModifyOptions().returnNew(true).upsert(true);
+
+        return mongoTemplate.findAndModify(query, updatePosition, options, Player.class);
+    }
+
+    @Override
     public GameSession updateGameSessionById(String sessionId) throws CargoMazePersistanceException {
         Query query = new Query(Criteria.where(GAME_SESSION_ID).is(sessionId));
         GameSession sessionInDataBase = mongoTemplate.findOne(query, GameSession.class);
@@ -165,6 +172,22 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
     @Override
     public GameSession updateGameSession(GameSession session) throws CargoMazePersistanceException {
         return mongoTemplate.save(session);
+    }
+
+    @Override 
+    public GameSession updateGameSessionBoard(String sessionId, Board board) throws CargoMazePersistanceException {
+        Query query = new Query(Criteria.where(GAME_SESSION_ID).is(sessionId));
+        Update updateBoard = new Update().set("board", board);
+        FindAndModifyOptions options = new FindAndModifyOptions().returnNew(true).upsert(true);    
+        return mongoTemplate.findAndModify(query, updateBoard, options, GameSession.class);
+    }
+
+    @Override
+    public GameSession updateGameSessionStatus(String sessionId, GameStatus status) throws CargoMazePersistanceException {
+        Query query = new Query(Criteria.where(GAME_SESSION_ID).is(sessionId));
+        Update updateStatus = new Update().set("status", status);
+        FindAndModifyOptions options = new FindAndModifyOptions().returnNew(true).upsert(true);
+        return mongoTemplate.findAndModify(query, updateStatus, options, GameSession.class);
     }
 
     @Override
