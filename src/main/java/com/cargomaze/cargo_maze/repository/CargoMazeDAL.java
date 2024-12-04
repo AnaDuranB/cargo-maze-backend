@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.cargomaze.cargo_maze.model.*;
 import com.cargomaze.cargo_maze.persistance.exceptions.CargoMazePersistanceException;
+import com.mongodb.client.ClientSession;
 
 public interface CargoMazeDAL {
 
@@ -33,9 +34,7 @@ public interface CargoMazeDAL {
 
     Player updatePlayerPosition(String playerId, Position position) throws CargoMazePersistanceException;
 
-    GameSession updateGameSessionById(String sessionId) throws CargoMazePersistanceException;
-
-    GameSession updateGameSession(GameSession session) throws CargoMazePersistanceException;
+    GameSession updateGameSessionById( String sessionId, GameSession gameSession) throws CargoMazePersistanceException;
 
     GameSession updateGameSessionBoard(String sessionId, Board board) throws CargoMazePersistanceException;
 
@@ -51,4 +50,8 @@ public interface CargoMazeDAL {
 
     Cell getCellAt(String gameSessionId, int x, int y) throws CargoMazePersistanceException;
 
+    boolean movePlayerTrasactionally(String playerId, String sessionId, Position playerPosition, Position newPosition) throws CargoMazePersistanceException;
+
+    boolean movePlayerWithBoxTransactionally(String playerId, String sessionId, Position playerPosition, Position newPlayerPosition, Position newBoxPosition) throws CargoMazePersistanceException;
+                                                
 }

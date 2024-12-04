@@ -40,8 +40,9 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
     @Override
     public void deletePlayer(String playerId) throws CargoMazePersistanceException {
         Player player = persistance.getPlayer(playerId);
-        if (player.getGameSession() != null) {
-            GameSession session = persistance.getSession(player.getGameSession());
+        String sessionId = player.getGameSession();
+        if (sessionId != null) {
+            GameSession session = persistance.getSession(sessionId);
             session.removePlayer(player);
             if (session.getPlayerCount() == 0) {
                 if (!session.getStatus().equals(GameStatus.RESETING_GAME)) {
@@ -49,9 +50,9 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
                 }
                 session.setStatus(GameStatus.WAITING_FOR_PLAYERS);
             }
-            persistance.updateGameSession(session);
+            persistance.updateGameSessionById(sessionId, session);
             System.out.println(session.getPlayers().size());
-        } 
+        }
         persistance.deletePlayer(player);
     }
 
@@ -94,7 +95,7 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
         if (session.getPlayers().size() == 4 && session.getPlayers().stream().allMatch(Player::isReady)) {
             session.setStatus(GameStatus.IN_PROGRESS);
         }
-        persistance.updateGameSession(session);
+        persistance.updateGameSessionById(gameSessionId, session);
         return persistance.updatePlayer(player);
     }
 
@@ -109,8 +110,9 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
                     session.resetGame();
                 }
                 session.setStatus(GameStatus.WAITING_FOR_PLAYERS);
+
             }
-            persistance.updateGameSession(session);
+            persistance.updateGameSessionById(gameSessionId, session);
             return persistance.updatePlayer(player);
         } else {
             throw new CargoMazePersistanceException(CargoMazePersistanceException.PLAYER_NOT_IN_SESSION);
@@ -125,7 +127,7 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
             throw new CargoMazeServicesException(CargoMazeServicesException.SESSION_IS_NOT_FINISHED);
         }
         session.resetGame();
-        return persistance.updateGameSession(session);
+        return persistance.updateGameSessionById(session.getSessionId(), session);
     }
 
     @Override
@@ -184,31 +186,79 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
         return persistance.getSession(gameSessionId).getBoardState();
     }
 
+
     @Override
     public boolean move(String playerId, String gameSessionId, Position direction) throws CargoMazePersistanceException, CargoMazeServicesException {
+        // Validar estado del jugador y sesión
         Player player = persistance.getPlayerInSession(gameSessionId, playerId);
         GameSession session = persistance.getSession(gameSessionId);
+
+        if (!session.getStatus().equals(GameStatus.IN_PROGRESS)) {
+            throw new CargoMazeServicesException("La sesión no está en progreso.");
+        }
+
+        Position playerPosition = player.getPosition();
+        Position newPosition = new Position(player.getPosition().getX() + direction.getX(), player.getPosition().getY() + direction.getY());
+        Board board = session.getBoard();
+
+        // Validar movimiento
+        if (!isValidPlayerMove(playerPosition, newPosition, board)) {
+            return false;
+        }
+
+        // Validar si hay una caja y su movimiento
+        if (board.hasBoxAt(newPosition)) {
+            Box box = board.getBoxAt(newPosition);
+            Position boxNewPosition = calculateNewPosition(newPosition, playerPosition);  
+            if (!isValidBoxMove(player, box, boxNewPosition, board)) {
+                return false;
+            }
+            return persistance.movePlayerWithBoxTransactionally(playerId, gameSessionId, playerPosition, newPosition, boxNewPosition);
+        }
+
+        // Si las validaciones pasan, delegar a la capa de persistencia
+        return persistance.movePlayerTrasactionally(playerId, gameSessionId, playerPosition, newPosition); 
+    }
+
+
+    /*@Override
+    public boolean move(String playerId, String gameSessionId, Position direction)throws CargoMazePersistenceException, CargoMazeServicesException {
+        Player player = persistance.getPlayerInSession(gameSessionId, playerId);
+        GameSession session = persistance.getSession(gameSessionId);
+        // Verificar el estado de la sesión
         if (!session.getStatus().equals(GameStatus.IN_PROGRESS)) {
             throw new CargoMazeServicesException(CargoMazeServicesException.SESSION_IS_NOT_IN_PROGRESS);
         }
-        Position newPosition = new Position(player.getPosition().getX() + direction.getX(),player.getPosition().getY() + direction.getY());
+        // Calcular la nueva posición del jugador
         Position currentPos = player.getPosition();
+        Position newPosition = calculateNewPosition(currentPos, direction);
         Board board = session.getBoard();
+
+        // Validar el movimiento del jugador
         if (isValidPlayerMove(currentPos, newPosition, board)) {
             if (board.hasBoxAt(newPosition)) {
-                boolean moveBox = moveBox(player, currentPos, newPosition, board, board.getBoxAt(newPosition),session);
-                if (!moveBox) {
+                Box box = board.getBoxAt(newPosition);
+                boolean boxMoved = moveBox(player, currentPos, newPosition, board, box, session);
+                if (!boxMoved) {
                     return false;
                 }
             }
-            return movePlayer(player, board, newPosition, currentPos, session, session.getSessionId());
+
+            // Mover al jugador
+            boolean playerMoved = movePlayer(player, board, newPosition, currentPos, session, session.getSessionId());
+            if (!playerMoved) {
+
+                return false;
+            }
+
+            return true;
         }
         return false;
     }
 
-    @Transactional
-    public boolean movePlayer(Player player, Board board, Position newPosition, Position currentPos, GameSession session, String sessionId) {
-        try {  
+    
+    private boolean movePlayer(Player player, Board board, Position newPosition, Position currentPos, GameSession session, String sessionId) {
+        try {
             persistance.updatePlayerPosition(player.getNickname(), newPosition);
 
             Cell cell1 = getCellAt(sessionId, currentPos.getX(), currentPos.getY());
@@ -220,16 +270,16 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
             board.setCellAt(newPosition, cell2);
 
             persistance.updateGameSessionBoard(session.getSessionId(), board);
-            
+
         } catch (Exception e) {
             return false;
         }
         return true;
     }
 
-    @Transactional
-    public boolean moveBox(Player player, Position playerPosition, Position boxPosition, Board board, Box box,GameSession session) throws CargoMazePersistanceException {
-        Position boxNewPosition = getPositionFromMovingABox(boxPosition, playerPosition); // Validates all postions (in
+    
+    private boolean moveBox(Player player, Position playerPosition, Position boxPosition, Board board, Box box, GameSession session) throws CargoMazePersistanceException {
+        Position boxNewPosition = calculateNewPosition(boxPosition, playerPosition); // Validates all postions (in
         String gameSessionId = session.getSessionId();
         if (isValidBoxMove(player, box, boxNewPosition, board)) { // va mover la caja
             try {
@@ -240,7 +290,7 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
                             .filter(b -> !b.equals(box))
                             .allMatch(Box::isAtTarget);
                     if (allOtherBoxesAtTarget) {
-                        persistance.updateGameSessionStatus(gameSessionId, GameStatus.COMPLETED);
+                        session.setStatus(GameStatus.COMPLETED);
 
                     }
                 } // si la caja esta en un target
@@ -252,34 +302,33 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
                 board.setCellAt(boxNewPosition, cell1);
                 session.setBoard(board);
                 persistance.updateGameSessionBoard(session.getSessionId(), board);
-            } 
-            catch (Exception e) {
+            } catch (Exception e) {
                 return false;
             }
             return true;
         }
         return false;
-    }
+    }*/
 
     private boolean isValidPlayerMove(Position currentPosition, Position newPosition, Board board) {
         return currentPosition.isAdjacent(newPosition) && board.isValidPosition(newPosition)
                 && !board.hasWallAt(newPosition) && !board.isPlayerAt(newPosition);
     }
 
-    private Position getPositionFromMovingABox(Position boxPosition, Position playerPosition) {
+    private Position calculateNewPosition(Position moverPosition, Position currentPosition) {
         // Eje y del jugador es menor al de la caja
-        if (playerPosition.getY() < boxPosition.getY()) {
-            return new Position(boxPosition.getX(), boxPosition.getY() + 1);
+        if (moverPosition.getY() < currentPosition.getY()) {
+            return new Position(currentPosition.getX(), currentPosition.getY() + 1);
         }
         // Eje y del jugador es mayor al de la caja
-        else if (playerPosition.getY() > boxPosition.getY()) {
-            return new Position(boxPosition.getX(), boxPosition.getY() - 1);
+        else if (moverPosition.getY() > currentPosition.getY()) {
+            return new Position(currentPosition.getX(), currentPosition.getY() - 1);
         }
         // Eje x del jugador es menor al de la caja
-        else if (playerPosition.getX() < boxPosition.getX()) {
-            return new Position(boxPosition.getX() + 1, boxPosition.getY());
+        else if (moverPosition.getX() < currentPosition.getX()) {
+            return new Position(currentPosition.getX() + 1, currentPosition.getY());
         }
-        return new Position(boxPosition.getX() - 1, boxPosition.getY());
+        return new Position(currentPosition.getX() - 1, currentPosition.getY());
     }
 
     private boolean isValidBoxMove(Player player, Box box, Position newPosition, Board board) {
