@@ -183,7 +183,7 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
                 Cell cell1 = getCellAtWithTime(sessionId, cell1Position.getX(), cell1Position.getY(), cell1Time);
                 Cell cell2 = getCellAtWithTime(sessionId, cell2Position.getX(), cell2Position.getY(), cell2Time);
                 if(cell1 == null || cell2 == null){
-                    session.abortTransaction();
+                    throw new CargoMazePersistanceException(CargoMazePersistanceException.FAILED_TRANSACTION);
                 }
                 board.getCellAt(cell1Position).setLastModified(System.currentTimeMillis());
                 board.getCellAt(cell2Position).setLastModified(System.currentTimeMillis());

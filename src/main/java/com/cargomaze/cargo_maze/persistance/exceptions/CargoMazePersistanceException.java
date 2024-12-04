@@ -13,6 +13,7 @@ public class CargoMazePersistanceException extends Exception {
     public static final String BOX_NOT_FOUND = "The box was not found";
     public static final String BOXES_NOT_FOUND = "The boxes were not found";
     public static final String CELL_NOT_FOUND = "The cell was not found";
+    public static final String FAILED_TRANSACTION = "The transaction failed";
 
     public CargoMazePersistanceException(String message) {
         super(message);
