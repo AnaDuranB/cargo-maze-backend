@@ -36,7 +36,7 @@ public interface CargoMazeDAL {
 
     GameSession updateGameSessionById( String sessionId, GameSession gameSession) throws CargoMazePersistanceException;
 
-    GameSession updateGameSessionBoard(String sessionId, Board board, long cell1Time, long cell2Time, Position cell1Position, Position cell2Position) throws CargoMazePersistanceException;
+    void updateGameSessionBoard(String sessionId, Board board, long cell1Time, long cell2Time, Position cell1Position, Position cell2Position) throws CargoMazePersistanceException;
 
     GameSession updateGameSessionStatus(String sessionId, GameStatus status, long clientTimestamp) throws CargoMazePersistanceException;
 
