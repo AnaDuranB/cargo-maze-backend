@@ -193,6 +193,7 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
                 session.commitTransaction();
             } catch (Exception e) {
                 session.abortTransaction();
+                throw new CargoMazePersistanceException(CargoMazePersistanceException.FAILED_TRANSACTION);
             }
         }
     }
