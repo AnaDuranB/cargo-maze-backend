@@ -2,6 +2,7 @@ package com.cargomaze.cargo_maze.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 
 @Document
@@ -12,11 +13,13 @@ public class Player{
     private Position position;
     private boolean isReady;
     private String gameSessionId = null; // no se sabe si es necesario (si se crean servicios directos del game session en teoria no)
+    private long lastModified;
 
     public Player(String nickname) {
         this.nickname = nickname;
         this.isReady = false;
         this.index = -1;
+        lastModified = System.currentTimeMillis();
     }
 
     public void setGameSession(String newGameSessionId) {
@@ -52,6 +55,15 @@ public class Player{
 
     public String getGameSession() {
         return gameSessionId;
+    }
+
+    
+    public void setLastModified(Long time){
+        lastModified = time;
+    }
+
+    public long getLastModified(){
+        return lastModified;
     }
 
     @Override 
