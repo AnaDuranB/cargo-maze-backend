@@ -163,8 +163,7 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
     }
 
     @Override
-    public GameSession updateGameSessionById(String sessionId, GameSession session)
-            throws CargoMazePersistanceException {
+    public GameSession updateGameSessionById(String sessionId, GameSession session) throws CargoMazePersistanceException {
         Query query = new Query(Criteria.where(GAME_SESSION_ID).is(sessionId));
         GameSession sessionInDataBase = mongoTemplate.findOne(query, GameSession.class);
         if (sessionInDataBase == null) {
@@ -174,7 +173,7 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
     }
 
     @Override
-    public GameSession updateGameSessionBoard(String sessionId, Board board, long cell1Time, 
+    public void updateGameSessionBoard(String sessionId, Board board, long cell1Time, 
         long cell2Time, Position cell1Position, Position cell2Position) throws CargoMazePersistanceException {
 
         try (ClientSession session = mongoClient.startSession()) {
@@ -184,21 +183,17 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
                 Cell cell1 = getCellAtWithTime(sessionId, cell1Position.getX(), cell1Position.getY(), cell1Time);
                 Cell cell2 = getCellAtWithTime(sessionId, cell2Position.getX(), cell2Position.getY(), cell2Time);
                 if(cell1 == null || cell2 == null){
-                    session.abortTransaction();
-                    return null;
+                    throw new CargoMazePersistanceException(CargoMazePersistanceException.FAILED_TRANSACTION);
                 }
                 board.getCellAt(cell1Position).setLastModified(System.currentTimeMillis());
                 board.getCellAt(cell2Position).setLastModified(System.currentTimeMillis());
                 Update updateBoard = new Update().set("board", board).set("lastModified", System.currentTimeMillis());
                 FindAndModifyOptions options = new FindAndModifyOptions().returnNew(true).upsert(false);
-                return mongoTemplate.findAndModify(query, updateBoard, options, GameSession.class);
+                mongoTemplate.findAndModify(query, updateBoard, options, GameSession.class);
+                session.commitTransaction();
             } catch (Exception e) {
                 session.abortTransaction();
-                return null;
             }
-        }
-        catch(Exception e){
-            return null;
         }
     }
 

@@ -222,6 +222,7 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
             try {
                 persistance.updateGameSessionBoard(gameSession.getSessionId(), board, timestampCell1, timestampCell2, currentPos, newPosition);
                 persistance.updatePlayerPosition(player.getNickname(), newPosition,player.getLastModified());
+                return true;
             } catch (CargoMazePersistanceException e) {
                 return false;
             }
