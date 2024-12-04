@@ -189,49 +189,16 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
     @Override
     public boolean move(String playerId, String gameSessionId, Position direction)
             throws CargoMazePersistanceException, CargoMazeServicesException {
-        Player player = persistance.getPlayerInSession(gameSessionId, playerId);
-        GameSession gameSession = persistance.getSession(gameSessionId);
-        if (!gameSession.getStatus().equals(GameStatus.IN_PROGRESS)) {
-            throw new CargoMazeServicesException(CargoMazeServicesException.SESSION_IS_NOT_IN_PROGRESS);
-        }
-        Position newPosition = new Position(player.getPosition().getX() + direction.getX(),
-                player.getPosition().getY() + direction.getY());
-        return movePlayer(player, newPosition, gameSession);
+                try {
+                    persistance.updateGameSessionBoard(gameSessionId, playerId, direction);
+                    return true;
+                } catch (CargoMazePersistanceException e) {
+                    return false;
+                }
 
     }
-
-    private boolean movePlayer(Player player, Position newPosition, GameSession gameSession) {
-        Position currentPos = player.getPosition();
-        Board board = gameSession.getBoard();
-        if (isValidPlayerMove(currentPos, newPosition, board)) {
-            /*
-             * if(board.hasBoxAt(newPosition)) {
-             * boolean moveBox = moveBox(player, currentPos, newPosition, board,
-             * gameSession);
-             * if (!moveBox) {
-             * return false;
-             * }
-             * }
-             */
-            player.updatePosition(newPosition);
-            long timestampCell1 = board.getCellAt(currentPos).getLastModified();
-            long timestampCell2 = board.getCellAt(newPosition).getLastModified();
-            board.getCellAt(currentPos).setState(Cell.EMPTY);
-            board.getCellAt(newPosition).setState(Cell.PLAYER);
-            gameSession.setBoard(board);
-            try {
-                persistance.updateGameSessionBoard(gameSession.getSessionId(), board, timestampCell1, timestampCell2, currentPos, newPosition);
-                persistance.updatePlayerPosition(player.getNickname(), newPosition,player.getLastModified());
-                return true;
-            } catch (CargoMazePersistanceException e) {
-                return false;
-            }
-        }
-
-        return false;
-    }
-
-    private boolean moveBox(Player player, Position playerPosition, Position boxPosition, Board board, GameSession gameSession) {
+}
+    /*private boolean moveBox(Player player, Position playerPosition, Position boxPosition, Board board, GameSession gameSession) {
         Position boxNewPosition = getPositionFromMovingABox(boxPosition, playerPosition); // Validates all postions (in
                                                                                           // theory);
         Box box = board.getBoxAt(boxPosition);
@@ -255,33 +222,5 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
         return false;
     }
 
-    private boolean isValidPlayerMove(Position currentPosition, Position newPosition, Board board) {
-        return currentPosition.isAdjacent(newPosition) && board.isValidPosition(newPosition)
-                && !board.hasWallAt(newPosition) && !board.isPlayerAt(newPosition);
-    }
+}*/
 
-    private Position getPositionFromMovingABox(Position boxPosition, Position playerPosition) {
-        // Eje y del jugador es menor al de la caja
-        if (playerPosition.getY() < boxPosition.getY()) {
-            return new Position(boxPosition.getX(), boxPosition.getY() + 1);
-        }
-        // Eje y del jugador es mayor al de la caja
-        else if (playerPosition.getY() > boxPosition.getY()) {
-            return new Position(boxPosition.getX(), boxPosition.getY() - 1);
-        }
-        // Eje x del jugador es menor al de la caja
-        else if (playerPosition.getX() < boxPosition.getX()) {
-            return new Position(boxPosition.getX() + 1, boxPosition.getY());
-        }
-        return new Position(boxPosition.getX() - 1, boxPosition.getY());
-    }
-
-    private boolean isValidBoxMove(Player player, Box box, Position newPosition, Board board) {
-        return player.getPosition().isAdjacent(box.getPosition()) &&
-                board.isValidPosition(newPosition) &&
-                !board.hasWallAt(newPosition) &&
-                !board.hasBoxAt(newPosition) &&
-                !board.isPlayerAt(newPosition);
-    }
-
-}
