@@ -210,6 +210,8 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
                     board.getCellAt(newPosition).setLastModified(System.currentTimeMillis());
                     Update updateBoard = new Update().set("board", board).set("lastModified", System.currentTimeMillis());
                     FindAndModifyOptions options = new FindAndModifyOptions().returnNew(true).upsert(false);
+                    player.updatePosition(newPosition);
+                    updatePlayerPosition(playerId, currentPosition, player.getLastModified());
                     mongoTemplate.findAndModify(query, updateBoard, options, GameSession.class);
                     session.commitTransaction();
                     System.out.println("Papi le funcionó supuestamente POSICION ORIGINAL " +  currentPosition + " POSICION NUEVA " + newPosition);
