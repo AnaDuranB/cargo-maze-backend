@@ -185,6 +185,11 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
     }
 
     @Override
+    public Box getBoxAt(String gameSessionId, int x, int y) throws CargoMazePersistanceException {
+        return persistance.getBoxAt(gameSessionId, new Position(x, y));
+    }
+
+    @Override
     
     public boolean move(String playerId, String gameSessionId, Position direction) throws CargoMazePersistanceException, CargoMazeServicesException {
         Player player = persistance.getPlayerInSessionBlockingIt(gameSessionId, playerId);
@@ -215,7 +220,6 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
     
     public boolean movePlayer(Player player, Board board, Position newPosition, Position currentPos, GameSession session, String sessionId) throws CargoMazePersistanceException {
         try {  
-            
             Cell cell1 = getCellAt(sessionId, currentPos.getX(), currentPos.getY());
             cell1.setState(Cell.EMPTY);
             Cell cell2 = getCellAt(sessionId, newPosition.getX(), newPosition.getY());
