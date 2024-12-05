@@ -17,7 +17,7 @@ public interface CargoMazeDAL {
 
     void deletePlayers() throws CargoMazePersistanceException;
 
-    Player getPlayerInSession(String playerId, String gameSessionId) throws CargoMazePersistanceException;
+    //Player getPlayerInSession(String playerId, String gameSessionId) throws CargoMazePersistanceException;
 
     Player getPlayerInSessionBlockingIt(String playerId, String gameSessionId) throws CargoMazePersistanceException;
 
@@ -25,7 +25,7 @@ public interface CargoMazeDAL {
 
     GameSession getSession(String gameSessionId) throws CargoMazePersistanceException;
 
-    GameSession getSessionBlockingIt(String gameSessionId) throws CargoMazePersistanceException;
+    //GameSession getSessionBlockingIt(String gameSessionId) throws CargoMazePersistanceException;
 
     int getPlayerCount(String gameSessionId) throws CargoMazePersistanceException;
 
@@ -43,10 +43,9 @@ public interface CargoMazeDAL {
 
     GameSession updateGameSession(GameSession session) throws CargoMazePersistanceException;
 
-    GameSession updateGameSessionBoard(String sessionId, Board board) throws CargoMazePersistanceException;
+    //GameSession updateGameSessionBoard(String sessionId, Board board) throws CargoMazePersistanceException;
 
-    GameSession updateGameSessionLocked(String sessionId, boolean locked) throws CargoMazePersistanceException;
-
+    //GameSession updateGameSessionLocked(String sessionId, boolean locked) throws CargoMazePersistanceException;
 
     GameSession updateGameSessionStatus(String sessionId, GameStatus status) throws CargoMazePersistanceException;
 
@@ -54,12 +53,22 @@ public interface CargoMazeDAL {
 
     void removePlayerFromSession(String playerId, String sessionId) throws CargoMazePersistanceException;
 
-    Box getBox(String gameSessionId, String boxId) throws CargoMazePersistanceException;
+    //Box getBox(String gameSessionId, String boxId) throws CargoMazePersistanceException;
 
     Box getBoxAt(String gameSessionId, Position boxPosition) throws CargoMazePersistanceException;
 
-    List<Box> getBoxes(String gameSessionId) throws CargoMazePersistanceException;
+    Box getBoxAtIndex(String gameSessionId, int index) throws CargoMazePersistanceException;    
+
+    //List<Box> getBoxes(String gameSessionId) throws CargoMazePersistanceException;
+
+    boolean unblockBoxAtIndex(String gameSessionId, int index) throws CargoMazePersistanceException;
+
+    boolean unBlockCellAt(String gameSessionId, int x, int y) throws CargoMazePersistanceException;
 
     Cell getCellAt(String gameSessionId, int x, int y) throws CargoMazePersistanceException;
+
+    boolean updateCellStateAt(String gameSessionId, Position position, String cell) throws CargoMazePersistanceException;
+
+    boolean updateBoxAtIndex(String gameSessionId, int index, Box box) throws CargoMazePersistanceException;
 
 }

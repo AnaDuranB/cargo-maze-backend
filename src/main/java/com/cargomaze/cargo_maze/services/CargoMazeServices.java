@@ -42,12 +42,10 @@ public interface CargoMazeServices {
     boolean isGameFinished(String gameSessionid) throws CargoMazePersistanceException;
 
     void removePlayersFromSession(String gameSessionId) throws CargoMazePersistanceException;
-    
-    Box getBox(String gameSessionId, String boxId) throws CargoMazePersistanceException;
-
-    List<Box> getBoxes(String gameSessionId) throws CargoMazePersistanceException;
 
     Cell getCellAt(String gameSessionId, int x, int y) throws CargoMazePersistanceException;
 
     Box getBoxAt(String gameSessionId, int x, int y) throws CargoMazePersistanceException;
+
+    Box getBoxAtIndex(String gameSessionId, int index) throws CargoMazePersistanceException;
 }

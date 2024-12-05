@@ -15,7 +15,6 @@ public class GameSession {
     private GameStatus status;
     private Board board;
     private LinkedList<Integer> indexes = new LinkedList<>(Arrays.asList(0, 1, 2, 3));
-    private boolean locked = false;
 
     public GameSession(String sessionId) {
         this.sessionId = sessionId;
@@ -98,10 +97,11 @@ public class GameSession {
     }
 
     public void removePlayer(Player player) {
-        board.setCellState(player.getPosition(), Cell.EMPTY);
-        indexes.add(player.getIndex());
-        players.remove(player);
-        System.out.println(players.size());
+        board.setCellState(player.getPosition(), Cell.EMPTY); //problemas de concurrencia
+        indexes.add(player.getIndex()); //problemas de concurrencia
+        players.remove(player); //problemas de concurrencia
+
+        //Se podria dejar y guardar unicamente el jugador, habria que bloquearlo completamente, entonces depronto haya que cambiarlo
         player.setIndex(-1);
         player.updatePosition(null);
         player.setGameSession(null);
@@ -111,17 +111,9 @@ public class GameSession {
 
     public void resetGame(){
         status = GameStatus.RESETING_GAME;
-        locked = false;
-        board.reset();
+        board.reset();  // se puede dejar ya que cambia todo el tablero.
         //indexes.addAll(Arrays.asList(0, 1, 2, 3));
     }
 
-    public void setLocked(boolean locked){
-        this.locked = locked;
-    }
-
-    public boolean isLocked(){
-        return locked;
-    }
 }
 
