@@ -216,7 +216,7 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
     @Override
     public GameSession updateGameSessionBoard(String sessionId, Board board) throws CargoMazePersistanceException {
         Query query = new Query(Criteria.where(GAME_SESSION_ID).is(sessionId));
-        Update updateBoard = new Update().set("board", board).set("locked", false);
+        Update updateBoard = new Update().set("board", board);
         FindAndModifyOptions options = new FindAndModifyOptions().returnNew(true).upsert(true);
         return mongoTemplate.findAndModify(query, updateBoard, options, GameSession.class);
     }
@@ -317,6 +317,14 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
     @Override
     @Transactional
     public Cell getCellAt(String gameSessionId, int x, int y) throws CargoMazePersistanceException {
+        String queryString = "board.cells."+x+"."+y+".locked";
+        Query query = new Query(Criteria.where(GAME_SESSION_ID).is(gameSessionId).and(queryString).is(false)); // Filtra cajas desbloqueadas
+        Update update = new Update().set(queryString, true);
+        FindAndModifyOptions options = new FindAndModifyOptions().returnNew(true).upsert(false);
+        if(mongoTemplate.findAndModify(query, update, options, GameSession.class) == null){
+            throw new CargoMazePersistanceException(CargoMazePersistanceException.CELL_BLOCKED);
+        }
+
         Aggregation aggregation = Aggregation.newAggregation(
                 // Filtrar por el ID de la sesión
                 Aggregation.match(Criteria.where("_id").is(gameSessionId)),
@@ -327,9 +335,8 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
                 Aggregation.project()
                         .and(ArrayOperators.ArrayElemAt.arrayOf("$cells").elementAt(y)).as("cell"),
                 // Reemplazar el root por la celda encontrada
-                Aggregation.replaceRoot("cell"),
-
-                Aggregation.match(Criteria.where("locked").is(false)));
+                Aggregation.replaceRoot("cell")
+        );
 
         // Ejecutar la agregación sobre la colección "gameSession" y obtener el
         // resultado mapeado a Cell
@@ -344,6 +351,7 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
     }
 
     @Override
+    @Transactional
     public Box getBoxAtIndex(String gameSessionId, int index) throws CargoMazePersistanceException{
         String queryString = "board.boxes."+index+".locked";
         Query query = new Query(Criteria.where(GAME_SESSION_ID).is(gameSessionId)
@@ -352,7 +360,7 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
         Update update = new Update().set(queryString, true);
         FindAndModifyOptions options = new FindAndModifyOptions().returnNew(true).upsert(false);
         if(mongoTemplate.findAndModify(query, update, options, GameSession.class) == null){
-            throw new CargoMazePersistanceException(CargoMazePersistanceException.BOX_NOT_FOUND);
+            throw new CargoMazePersistanceException(CargoMazePersistanceException.BOX_BLOCKED);
         }
 
         Aggregation aggregation = Aggregation.newAggregation(
@@ -381,7 +389,6 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
     }
 
     @Override
-    @Transactional
     public Box getBoxAt(String gameSessionId, Position boxPosition) throws CargoMazePersistanceException {
         Aggregation aggregation = Aggregation.newAggregation(
                 // Filtrar por el gameSessionId
@@ -407,4 +414,29 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
 
         return box;
     }
+
+    @Override
+    @Transactional
+    public boolean unblockBoxAtIndex(String gameSessionId, int index) throws CargoMazePersistanceException{
+        String queryString = "board.boxes."+index+".locked";
+        Query query = new Query(Criteria.where(GAME_SESSION_ID).is(gameSessionId)
+        .and(queryString).is(true)); // Filtra cajas desbloqueadas
+        Update update = new Update().set(queryString, false);
+        FindAndModifyOptions options = new FindAndModifyOptions().returnNew(true).upsert(false);
+
+        return mongoTemplate.findAndModify(query, update, options, GameSession.class) != null;
+    }
+
+    @Override 
+    @Transactional
+    public boolean unBlockCellAt(String gameSessionId, int x, int y) throws CargoMazePersistanceException{
+        String queryString = "board.cells."+x+"."+y+".locked";
+        Query query = new Query(Criteria.where(GAME_SESSION_ID).is(gameSessionId).and(queryString).is(true)); // Filtra cajas desbloqueadas
+        Update update = new Update().set(queryString, false);
+        FindAndModifyOptions options = new FindAndModifyOptions().returnNew(true).upsert(false);
+
+        return mongoTemplate.findAndModify(query, update, options, GameSession.class) != null;
+    }
+
+
 }

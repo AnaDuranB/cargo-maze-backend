@@ -62,6 +62,10 @@ public interface CargoMazeDAL {
 
     List<Box> getBoxes(String gameSessionId) throws CargoMazePersistanceException;
 
+    boolean unblockBoxAtIndex(String gameSessionId, int index) throws CargoMazePersistanceException;
+
+    boolean unBlockCellAt(String gameSessionId, int x, int y) throws CargoMazePersistanceException;
+
     Cell getCellAt(String gameSessionId, int x, int y) throws CargoMazePersistanceException;
 
 }
