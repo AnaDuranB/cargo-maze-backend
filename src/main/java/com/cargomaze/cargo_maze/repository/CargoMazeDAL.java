@@ -47,6 +47,8 @@ public interface CargoMazeDAL {
 
     //GameSession updateGameSessionLocked(String sessionId, boolean locked) throws CargoMazePersistanceException;
 
+    GameStatus getGameSessionStatus(String sessionId) throws CargoMazePersistanceException;
+
     GameSession updateGameSessionStatus(String sessionId, GameStatus status) throws CargoMazePersistanceException;
 
     void deletePlayer(String playerId) throws CargoMazePersistanceException;
