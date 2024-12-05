@@ -15,6 +15,7 @@ public class Box {
         this.id = id;
         this.position = position;
         this.isAtTarget = false;
+        this.index = index;
     }
 
     public void move(Position newPosition){
