@@ -35,6 +35,7 @@ import java.util.Map;
 
 
 @RestController
+@CrossOrigin(origins = "http://localhost:4200")
 @RequestMapping("/cargoMaze")
 public class CargoMazeController {
 
@@ -51,14 +52,17 @@ public class CargoMazeController {
 
     @GetMapping("/correct")
     @ResponseBody
-    public String getToken(
+    public void getToken(
             @RegisteredOAuth2AuthorizedClient("aad") OAuth2AuthorizedClient authorizedClient,
             HttpServletResponse response,
             RedirectAttributes redirectAttributes) throws IOException, InterruptedException {
-//        try {
+        try {
+            //acceso del token
+
             String token = authorizedClient.getAccessToken().getTokenValue();
+            System.out.println("Token obtenido: " + token);
+
             HttpClient client = HttpClient.newHttpClient();
-            System.out.println(token);
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create("https://graph.microsoft.com/v1.0/me"))
                     .header("Authorization", "Bearer " + token)
@@ -67,38 +71,36 @@ public class CargoMazeController {
 
             HttpResponse<String> responseGraph = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            // Parse the JSON response
+            // Parse the JSON response of Microsoft Graph
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode jsonNode = objectMapper.readTree(responseGraph.body());
             System.out.println(jsonNode);
-
 
             String displayName = jsonNode.path("displayName").asText();
             String userPrincipalName = jsonNode.path("userPrincipalName").asText();
             System.out.println("Display Name: " + displayName);
             System.out.println("User Principal Name: " + userPrincipalName);
+
             if(userPrincipalName.length() == 0){
                 userPrincipalName = authServices.getEmailFromToken(token);
                 String[] data = userPrincipalName.split("@");
                 displayName = data[0];
             }
-        try {
+
             cargoMazeServices.createPlayer(displayName);
+
+            String redirectUrl = String.format(
+                    "http://localhost:4200/sessionMenu.html?displayName=%s&userPrincipalName=%s&token=%s",
+                    URLEncoder.encode(displayName, StandardCharsets.UTF_8),
+                    URLEncoder.encode(userPrincipalName, StandardCharsets.UTF_8),
+                    URLEncoder.encode(token, StandardCharsets.UTF_8)
+            );
+            System.out.println("Redirigiendo a: " + redirectUrl);
+
+            response.sendRedirect(redirectUrl);
         } catch (CargoMazePersistanceException | CargoMazeServicesException e) {
             throw new RuntimeException(e);
         }
-        String redirectUrl = String.format(
-                    "http://localhost:4200/salas?displayName=%s&userPrincipalName=%s&id=%s",
-                    URLEncoder.encode(displayName, StandardCharsets.UTF_8),
-                    URLEncoder.encode(userPrincipalName, StandardCharsets.UTF_8),
-                    URLEncoder.encode(displayName, StandardCharsets.UTF_8)
-            );
-        System.out.println("Principal name:" + userPrincipalName + userPrincipalName.length());
-        return token;
-//            return new ResponseEntity<>(HttpStatus.CREATED);
-//        } catch (CargoMazePersistanceException | CargoMazeServicesException ex) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
-//        }
     }
 
 
