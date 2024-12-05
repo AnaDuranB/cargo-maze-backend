@@ -2,7 +2,7 @@ package com.cargomaze.cargo_maze.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Document
 public class Player{
@@ -13,6 +13,7 @@ public class Player{
     private boolean isReady;
     private String gameSessionId = null; // no se sabe si es necesario (si se crean servicios directos del game session en teoria no)
 
+//    public Player() {}
     public Player(String nickname) {
         this.nickname = nickname;
         this.isReady = false;
@@ -39,6 +40,7 @@ public class Player{
     public String getNickname() {
         return nickname;
     }
+
     public Position getPosition() {
         return position;
     }

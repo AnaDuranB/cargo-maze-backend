@@ -3,15 +3,33 @@ package com.cargomaze.cargo_maze.controller;
 import com.cargomaze.cargo_maze.model.Player;
 import com.cargomaze.cargo_maze.model.Position;
 import com.cargomaze.cargo_maze.persistance.exceptions.*;
+import com.cargomaze.cargo_maze.services.AuthServices;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
 import org.springframework.web.bind.annotation.*;
 
 import com.cargomaze.cargo_maze.services.CargoMazeServices;
 import com.cargomaze.cargo_maze.services.exceptions.CargoMazeServicesException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -21,17 +39,74 @@ import java.util.Map;
 public class CargoMazeController {
 
     private final CargoMazeServices cargoMazeServices;
-    
+    private final AuthServices authServices;
+
+    private static final Logger logger = LoggerFactory.getLogger(CargoMazeController.class);
+
     @Autowired
-    public CargoMazeController(CargoMazeServices cargoMazeServices){
+    public CargoMazeController(CargoMazeServices cargoMazeServices, AuthServices authServices){
         this.cargoMazeServices = cargoMazeServices;
+        this.authServices = authServices;
     }
+
+    @GetMapping("/correct")
+    @ResponseBody
+    public String getToken(
+            @RegisteredOAuth2AuthorizedClient("aad") OAuth2AuthorizedClient authorizedClient,
+            HttpServletResponse response,
+            RedirectAttributes redirectAttributes) throws IOException, InterruptedException {
+//        try {
+            String token = authorizedClient.getAccessToken().getTokenValue();
+            HttpClient client = HttpClient.newHttpClient();
+            System.out.println(token);
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://graph.microsoft.com/v1.0/me"))
+                    .header("Authorization", "Bearer " + token)
+                    .GET()
+                    .build();
+
+            HttpResponse<String> responseGraph = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            // Parse the JSON response
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode jsonNode = objectMapper.readTree(responseGraph.body());
+            System.out.println(jsonNode);
+
+
+            String displayName = jsonNode.path("displayName").asText();
+            String userPrincipalName = jsonNode.path("userPrincipalName").asText();
+            System.out.println("Display Name: " + displayName);
+            System.out.println("User Principal Name: " + userPrincipalName);
+            if(userPrincipalName.length() == 0){
+                userPrincipalName = authServices.getEmailFromToken(token);
+                String[] data = userPrincipalName.split("@");
+                displayName = data[0];
+            }
+        try {
+            cargoMazeServices.createPlayer(displayName);
+        } catch (CargoMazePersistanceException | CargoMazeServicesException e) {
+            throw new RuntimeException(e);
+        }
+        String redirectUrl = String.format(
+                    "http://localhost:4200/salas?displayName=%s&userPrincipalName=%s&id=%s",
+                    URLEncoder.encode(displayName, StandardCharsets.UTF_8),
+                    URLEncoder.encode(userPrincipalName, StandardCharsets.UTF_8),
+                    URLEncoder.encode(displayName, StandardCharsets.UTF_8)
+            );
+        System.out.println("Principal name:" + userPrincipalName + userPrincipalName.length());
+        return token;
+//            return new ResponseEntity<>(HttpStatus.CREATED);
+//        } catch (CargoMazePersistanceException | CargoMazeServicesException ex) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+//        }
+    }
+
 
     //Session controller
 
     /**
      * Reurns the base lobby
-     * @return 
+     * @return
      */
     @GetMapping("/sessions/{id}")
     public ResponseEntity<?> getGameSession(@PathVariable String id) {
@@ -39,7 +114,7 @@ public class CargoMazeController {
             return new ResponseEntity<>(cargoMazeServices.getGameSession(id),HttpStatus.OK);
         } catch (CargoMazePersistanceException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
-        }        
+        }
     }
 
 
@@ -49,7 +124,7 @@ public class CargoMazeController {
             return new ResponseEntity<>(cargoMazeServices.getBoardState(id),HttpStatus.ACCEPTED);
         } catch ( CargoMazePersistanceException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
-        }        
+        }
     }
 
     @GetMapping("/sessions/{id}/state")
@@ -62,7 +137,7 @@ public class CargoMazeController {
     }
 
     //Player controller
-    
+
     @GetMapping("/players/{nickName}")
 
     public ResponseEntity<?> getPlayer(@PathVariable String nickName) {
@@ -70,7 +145,7 @@ public class CargoMazeController {
             return new ResponseEntity<>(cargoMazeServices.getPlayerById(nickName),HttpStatus.ACCEPTED);
         } catch (CargoMazePersistanceException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
-        }        
+        }
     }
 
     @GetMapping("/players")
@@ -79,7 +154,7 @@ public class CargoMazeController {
             return new ResponseEntity<>(cargoMazeServices.getPlayers(),HttpStatus.ACCEPTED);
         } catch (CargoMazePersistanceException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
-        }        
+        }
     }
 
     /**
@@ -128,7 +203,7 @@ public class CargoMazeController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
         }
     }
-    
+
     @PutMapping("/sessions/{sessionId}/players/{nickname}/move")
     public ResponseEntity<?> movePlayer(@RequestBody Position position, @PathVariable String sessionId, @PathVariable String nickname) {
         if (position == null) {

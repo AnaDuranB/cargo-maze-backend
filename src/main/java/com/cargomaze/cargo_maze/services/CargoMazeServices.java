@@ -40,6 +40,5 @@ public interface CargoMazeServices {
     boolean isGameFinished(String gameSessionid) throws CargoMazePersistanceException;
 
     void removePlayersFromSession(String gameSessionId) throws CargoMazePersistanceException;
-    
-    
+
 }
