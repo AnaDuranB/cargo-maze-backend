@@ -213,8 +213,11 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
                     player.updatePosition(newPosition);
                     updatePlayerPosition(playerId, newPosition, player.getLastModified());
                     mongoTemplate.findAndModify(query, updateBoard, options, GameSession.class);
-                    session.commitTransaction();
                     System.out.println("Papi le funcionó supuestamente POSICION ORIGINAL " +  currentPosition + " POSICION NUEVA " + newPosition);
+                    System.out.println("Tiempo Cell 1 antes: " + timestampCell1 + " Tiempo Cell 2 antes: " + timestampCell2);
+                    System.out.println("Tiempo Cell 1 despues: " + board.getCellAt(currentPosition).getLastModified() + " Tiempo Cell 2 despues: " + board.getCellAt(newPosition).getLastModified());
+                    session.commitTransaction();
+                    
                 }
                 else{
                     throw new CargoMazeServicesException(CargoMazePersistanceException.FAILED_TRANSACTION);
