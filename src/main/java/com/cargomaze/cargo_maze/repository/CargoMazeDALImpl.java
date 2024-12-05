@@ -124,6 +124,16 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
         }
         return sessionInDB;
     }
+
+    @Override
+    public GameStatus getGameSessionStatus(String sessionId) throws CargoMazePersistanceException { // cambiar
+        Aggregation aggregation = Aggregation.newAggregation(
+            Aggregation.match(Criteria.where("_id").is("1")),
+            Aggregation.project("status").andExclude("_id") 
+        );
+        return mongoTemplate.aggregate(aggregation, "gameSession", GameStatus.class).getUniqueMappedResult();
+
+    }
     /* 
 
     @Override
