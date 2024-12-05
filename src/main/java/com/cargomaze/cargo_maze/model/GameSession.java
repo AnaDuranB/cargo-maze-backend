@@ -106,10 +106,12 @@ public class GameSession {
         player.updatePosition(null);
         player.setGameSession(null);
         player.setReady(false);
+        player.setLocked(false);
     }
 
     public void resetGame(){
         status = GameStatus.RESETING_GAME;
+        locked = false;
         board.reset();
         //indexes.addAll(Arrays.asList(0, 1, 2, 3));
     }
