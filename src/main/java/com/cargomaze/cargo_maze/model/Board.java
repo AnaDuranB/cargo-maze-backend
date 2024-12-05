@@ -103,7 +103,7 @@ public class Board {
         addBox(new Position(4, 4), 0);
         addBox(new Position(2, 5), 1);
         addBox(new Position(4, 6), 2);
-        addBox(new Position(7, 3), 4);
+        addBox(new Position(7, 3), 3);
 
         // player start positions
         playerStartPositions.add(new Position(0, 0));

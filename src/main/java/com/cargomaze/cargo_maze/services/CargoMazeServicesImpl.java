@@ -205,6 +205,7 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
             if (board.hasBoxAt(newPosition)) {
                 boolean moveBox = moveBox(player, currentPos, newPosition, board, session);
                 if (!moveBox) {
+                    System.out.println("Error moving box");
                     persistance.updatePlayerLocked(playerId, false);
                     persistance.updateGameSessionLocked(gameSessionId, false);
                     return false;
