@@ -187,18 +187,36 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
     }
 
     @Override
+
+    @Transactional
+    public boolean move(String playerId, String gameSessionId, Position direction) throws CargoMazePersistanceException, CargoMazeServicesException {
+        Player player = persistance.getPlayerInSession(gameSessionId, playerId);
+        GameSession session = persistance.getSession(gameSessionId);
+        if (!session.getStatus().equals(GameStatus.IN_PROGRESS)) {
+            throw new CargoMazeServicesException(CargoMazeServicesException.SESSION_IS_NOT_IN_PROGRESS);
+        }
+
+        Position newPosition = new Position(player.getPosition().getX() + direction.getX(),player.getPosition().getY() + direction.getY());
+        Position currentPos = player.getPosition();
+        Board board = session.getBoard();
+        if (isValidPlayerMove(currentPos, newPosition, board)) {
+            if (board.hasBoxAt(newPosition)) {
+                boolean moveBox = moveBox(player, currentPos, newPosition, board, board.getBoxAt(newPosition),session);
+                if (!moveBox) {
+
     public boolean move(String playerId, String gameSessionId, Position direction)
             throws CargoMazePersistanceException, CargoMazeServicesException {
                 try {
                     persistance.updateGameSessionBoard(gameSessionId, playerId, direction);
                     return true;
                 } catch (CargoMazePersistanceException e) {
+
                     return false;
                 }
 
     }
 }
-    /*private boolean moveBox(Player player, Position playerPosition, Position boxPosition, Board board, GameSession gameSession) {
+    private boolean moveBox(Player player, Position playerPosition, Position boxPosition, Board board, GameSession gameSession) {
         Position boxNewPosition = getPositionFromMovingABox(boxPosition, playerPosition); // Validates all postions (in
                                                                                           // theory);
         Box box = board.getBoxAt(boxPosition);
@@ -222,5 +240,5 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
         return false;
     }
 
-}*/
+}
 
