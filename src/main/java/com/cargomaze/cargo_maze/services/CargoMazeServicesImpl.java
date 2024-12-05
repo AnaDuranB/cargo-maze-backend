@@ -228,6 +228,8 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
             System.out.println("Cell2 player is there state: " + cell2.getState());
             persistance.updatePlayerPosition(player.getNickname(), newPosition); 
             System.out.println("Player moved to: " + newPosition.toString() + " unblocking player");
+
+
         } catch (Exception e) { 
             persistance.updatePlayerLocked(player.getNickname(), false);
             return false;
@@ -258,13 +260,14 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
                 }
                 Cell cell1 = getCellAt(gameSessionId, boxNewPosition.getX(), boxNewPosition.getY());
                 cell1.setState(Cell.BOX);
+                
                 Cell cell2 = getCellAt(gameSessionId, boxPosition.getX(), boxPosition.getY());
-                cell1.setState(Cell.EMPTY);
+                cell2.setState(Cell.EMPTY);
 
                 box.setLocked(false);
 
                 System.out.println("Cell box state: " + cell1.getState());
-                System.out.println("Cell boxwasthere state: " + cell1.getState());
+                System.out.println("Cell boxwasthere state: " + cell2.getState());
 
                 persistance.updateBoxAtIndex(gameSessionId, boxIndex, box);
                 persistance.updateCellStateAt(gameSessionId, boxNewPosition, cell1.getState());
