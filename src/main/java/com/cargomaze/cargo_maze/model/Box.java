@@ -9,6 +9,7 @@ public class Box {
     private String id;
     private Position position;
     private boolean isAtTarget;
+    private boolean locked = false;
 
     public Box(String id, Position position) {
         this.id = id;
@@ -34,6 +35,14 @@ public class Box {
     
     public boolean isAtTarget() {
         return isAtTarget;
+    }
+
+    public void setLocked(boolean locked){
+        this.locked = locked;
+    }
+
+    public boolean isLocked(){
+        return locked;
     }
 
     @Override

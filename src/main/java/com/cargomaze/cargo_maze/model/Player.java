@@ -12,6 +12,7 @@ public class Player{
     private Position position;
     private boolean isReady;
     private String gameSessionId = null; // no se sabe si es necesario (si se crean servicios directos del game session en teoria no)
+    private boolean locked= false;
 
     public Player(String nickname) {
         this.nickname = nickname;
@@ -52,6 +53,14 @@ public class Player{
 
     public String getGameSession() {
         return gameSessionId;
+    }
+
+    public void setLocked(boolean locked){
+        this.locked = locked;
+    }
+
+    public boolean isLocked(){
+        return locked;
     }
 
     @Override 

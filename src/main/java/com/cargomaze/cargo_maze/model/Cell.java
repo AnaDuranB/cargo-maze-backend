@@ -16,6 +16,8 @@ public class Cell {
     public static final String BOX_ON_TARGET =  "BOX_ON_TARGET";
     public static final String PLAYER_ON_TARGET =  "PLAYER_ON_TARGET";
     private String state = "";
+    private Boolean locked = false;
+
     public Cell(String state){
         this.state = state;
         id = UUID.randomUUID().toString();
@@ -24,15 +26,20 @@ public class Cell {
     public void setState(String newState){
         if(state.equals(Cell.TARGET) && newState.equals(Cell.BOX)){
             state = Cell.BOX_ON_TARGET;
+            
         }
         else if((state.equals(Cell.TARGET) && newState.equals(Cell.PLAYER)) || (state.equals(Cell.BOX_ON_TARGET) && newState.equals(Cell.PLAYER)) ){
             state = Cell.PLAYER_ON_TARGET; 
+            
         }
         else if((state.equals(Cell.BOX_ON_TARGET) || state.equals(Cell.PLAYER_ON_TARGET))&& newState.equals(Cell.EMPTY)){
             state = Cell.TARGET;
         }
         else{
             state = newState;
+        }
+        if(state.equals(Cell.BOX) || state.equals(Cell.PLAYER)){
+    
         }
     }
 
@@ -42,6 +49,15 @@ public class Cell {
 
     public String getId(){
         return id;
+    }
+
+
+    public void setLocked(boolean locked){
+        this.locked = locked;
+    }
+
+    public boolean isLocked(){
+        return locked;
     }
 
     @Override
