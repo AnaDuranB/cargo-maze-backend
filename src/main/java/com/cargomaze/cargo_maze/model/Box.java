@@ -10,8 +10,8 @@ public class Box {
     private Position position;
     private boolean isAtTarget;
     private boolean locked = false;
-
-    public Box(String id, Position position) {
+    private int index;
+    public Box(String id, Position position, int index) {
         this.id = id;
         this.position = position;
         this.isAtTarget = false;
@@ -43,6 +43,14 @@ public class Box {
 
     public boolean isLocked(){
         return locked;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
+    }
+
+    public int getIndex() {
+        return index;
     }
 
     @Override

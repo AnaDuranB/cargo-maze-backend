@@ -259,6 +259,7 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
                 }
                 Cell cell1 = getCellAt(gameSessionId, boxNewPosition.getX(), boxNewPosition.getY());
                 cell1.setState(Cell.BOX);
+                board.setBoxInList(box);
                 board.setCellAt(boxNewPosition, cell1);
                 session.setBoard(board);
             } 
