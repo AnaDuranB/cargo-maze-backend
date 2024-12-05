@@ -8,14 +8,9 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.aggregation.ArrayOperators;
+
 import com.cargomaze.cargo_maze.model.*;
 import com.cargomaze.cargo_maze.persistance.exceptions.CargoMazePersistanceException;
-import com.cargomaze.cargo_maze.services.exceptions.CargoMazeServicesException;
-import com.mongodb.client.MongoClient;
-
-import nonapi.io.github.classgraph.concurrency.SingletonMap.NewInstanceException;
-
-import com.mongodb.client.ClientSession;
 
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
@@ -26,21 +21,18 @@ import org.springframework.data.mongodb.core.query.Criteria;
 public class CargoMazeDALImpl implements CargoMazeDAL {
 
     private MongoTemplate mongoTemplate;
-    private MongoClient mongoClient;
-
-
-    @Autowired
-    public CargoMazeDALImpl(MongoTemplate mongoTemplate, MongoClient mongoClient) {
-        this.mongoTemplate = mongoTemplate;
-        this.mongoClient = mongoClient;
-        GameSession baseSession = new GameSession("1");
-        addSession(baseSession);
-    }
 
     private static final String GAME_SESSION_ID = "sessionId";
     private static final String PLAYER_ID = "nickname";
     private static final String BOARD_ID = "id";
     private static final String BOX_ID = "id";
+
+    @Autowired
+    public CargoMazeDALImpl(MongoTemplate mongoTemplate) {
+        this.mongoTemplate = mongoTemplate;
+        GameSession baseSession = new GameSession("1");
+        addSession(baseSession);
+    }
 
     @Override
     public int getPlayerCount(String gameSessionId) throws CargoMazePersistanceException {
@@ -96,6 +88,23 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
     }
 
     @Override
+    public Player getPlayerInSessionBlockingIt(String sessionId, String playerId) throws CargoMazePersistanceException {
+        Query lockQuery = new Query(Criteria.where(PLAYER_ID).is(playerId).and("locked").is(false));
+        Update lockUpdate = new Update().set("locked", true);
+        FindAndModifyOptions options = new FindAndModifyOptions().returnNew(true).upsert(false);
+        Player lockedPlayer = mongoTemplate.findAndModify(lockQuery, lockUpdate, options, Player.class);
+
+        if (lockedPlayer == null) {
+            throw new CargoMazePersistanceException(CargoMazePersistanceException.PLAYER_NOT_FOUND);
+        }
+        if (lockedPlayer.getGameSession() == null || !lockedPlayer.getGameSession().equals(sessionId)) {
+            throw new CargoMazePersistanceException(CargoMazePersistanceException.PLAYER_NOT_IN_SESSION);
+        }
+        return lockedPlayer;
+
+    }
+
+    @Override
     public GameSession addSession(GameSession session) {
         Query query = new Query(Criteria.where(GAME_SESSION_ID).is(session.getSessionId()));
         GameSession sessionInDataBase = mongoTemplate.findOne(query, GameSession.class);
@@ -113,6 +122,20 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
             throw new CargoMazePersistanceException(CargoMazePersistanceException.GAME_SESSION_NOT_FOUND);
         }
         return sessionInDB;
+    }
+
+    @Override
+    public GameSession getSessionBlockingIt(String sessionId) throws CargoMazePersistanceException {
+        Query lockQuery = new Query(Criteria.where("_id").is(sessionId).and("locked").is(false));
+        Update lockUpdate = new Update().set("locked", true);
+        FindAndModifyOptions options = new FindAndModifyOptions().returnNew(true).upsert(false);
+        GameSession lockedSession = mongoTemplate.findAndModify(lockQuery, lockUpdate, options, GameSession.class);
+
+        if (lockedSession == null) {
+            throw new CargoMazePersistanceException("Game session is locked or does not exist.");
+        }
+
+        return lockedSession;
     }
 
     @Override
@@ -158,88 +181,59 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
     }
 
     @Override
-    public Player updatePlayerPosition(String playerId, Position currentPosition, long clientTimestamp)throws CargoMazePersistanceException {
-        Query query = new Query(Criteria.where(PLAYER_ID).is(playerId).and("lastModified").is(clientTimestamp));
-        Update updatePosition = new Update().set("position", currentPosition).set("lastModified", System.currentTimeMillis());
-        FindAndModifyOptions options = new FindAndModifyOptions().returnNew(true).upsert(false);
-
+    public Player updatePlayerPosition(String playerId, Position newPosition) throws CargoMazePersistanceException {
+        Query query = new Query(Criteria.where(PLAYER_ID).is(playerId));
+        Update updatePosition = new Update().set("position", newPosition).set("locked", false);
+        FindAndModifyOptions options = new FindAndModifyOptions().returnNew(true).upsert(true);
         return mongoTemplate.findAndModify(query, updatePosition, options, Player.class);
     }
 
     @Override
-    public GameSession updateGameSessionById(String sessionId, GameSession session) throws CargoMazePersistanceException {
+    public Player updatePlayerLocked(String playerId, boolean locked) throws CargoMazePersistanceException{
+        Query query = new Query(Criteria.where(PLAYER_ID).is(playerId));
+        Update updateLocked = new Update().set("locked", locked);
+        FindAndModifyOptions options = new FindAndModifyOptions().returnNew(true).upsert(true);
+        return mongoTemplate.findAndModify(query, updateLocked, options, Player.class);
+    }
+
+    @Override
+    public GameSession updateGameSessionById(String sessionId) throws CargoMazePersistanceException {
         Query query = new Query(Criteria.where(GAME_SESSION_ID).is(sessionId));
         GameSession sessionInDataBase = mongoTemplate.findOne(query, GameSession.class);
         if (sessionInDataBase == null) {
             throw new CargoMazePersistanceException(CargoMazePersistanceException.GAME_SESSION_NOT_FOUND);
+        } else {
+            return mongoTemplate.save(sessionInDataBase);
         }
+    }
+
+    @Override
+    public GameSession updateGameSession(GameSession session) throws CargoMazePersistanceException {
         return mongoTemplate.save(session);
     }
 
     @Override
-    public void updateGameSessionBoard(String sessionId, String playerId, Position direction) throws CargoMazePersistanceException {
-
-        try (ClientSession session = mongoClient.startSession()) {
-            session.startTransaction();
-            try {
-                GameSession gameSession = getSession(sessionId);
-                Player player = getPlayerInSession(sessionId, playerId);
-                long playerTimestamp = player.getLastModified();
-                if (!gameSession.getStatus().equals(GameStatus.IN_PROGRESS)) {
-                        throw new CargoMazeServicesException(CargoMazeServicesException.SESSION_IS_NOT_IN_PROGRESS);
-                }
-                Position currentPosition = player.getPosition();
-                Position newPosition = new Position(currentPosition.getX() + direction.getX(), currentPosition.getY() + direction.getY());
-                Board board = gameSession.getBoard();
-                if(isValidPlayerMove(currentPosition, newPosition, board)){
-                    Query query = new Query(Criteria.where(GAME_SESSION_ID).is(sessionId));
-                    long timestampCell1 = board.getCellAt(currentPosition).getLastModified();
-                    long timestampCell2 = board.getCellAt(newPosition).getLastModified();
-                    Cell cell1 = getCellAtWithTime(sessionId, currentPosition.getX(), currentPosition.getY(), timestampCell1);
-                    Cell cell2 = getCellAtWithTime(sessionId, newPosition.getX(), newPosition.getY(), timestampCell2);
-                    cell1.setState(Cell.EMPTY);
-                    cell2.setState(Cell.PLAYER);
-                    board.setCellAt(currentPosition, cell1);
-                    board.setCellAt(newPosition, cell2);
-                    gameSession.setBoard(board);
-                    long actualTimestamp = getPlayerInSession(sessionId, playerId).getLastModified();
-                    if(actualTimestamp!= playerTimestamp){
-                        System.out.println(" Supuesta timeSpam actual " +  actualTimestamp + " TimeSpam del jugador entrando " + playerTimestamp);
-                        throw new CargoMazeServicesException(CargoMazePersistanceException.FAILED_TRANSACTION);
-                    }
-
-                    updatePlayerPosition(playerId, newPosition, playerTimestamp);
-
-                    board.getCellAt(currentPosition).setLastModified(System.currentTimeMillis());
-                    board.getCellAt(newPosition).setLastModified(System.currentTimeMillis());
-                    Update updateBoard = new Update().set("board", board).set("lastModified", System.currentTimeMillis());
-                    FindAndModifyOptions options = new FindAndModifyOptions().returnNew(true).upsert(false);
-                   
-                    mongoTemplate.findAndModify(query, updateBoard, options, GameSession.class);
-                    System.out.println("Papi le funcionó supuestamente POSICION ORIGINAL " +  currentPosition + " POSICION NUEVA " + newPosition);
-                    System.out.println("Tiempo Cell 1 antes: " + timestampCell1 + " Tiempo Cell 2 antes: " + timestampCell2 );
-                    System.out.println("Tiempo Cell 1 despues: " + board.getCellAt(currentPosition).getLastModified() + " Tiempo Cell 2 despues: " + board.getCellAt(newPosition).getLastModified());
-                    session.commitTransaction();
-                    
-                }
-                else{
-                    throw new CargoMazeServicesException(CargoMazePersistanceException.FAILED_TRANSACTION);
-                }
-
-            } catch (Exception e) {
-                System.out.println("Papi no le funciono esa transaccion");
-                session.abortTransaction();
-                throw new CargoMazePersistanceException(CargoMazePersistanceException.FAILED_TRANSACTION);
-            }
-        }
+    public GameSession updateGameSessionBoard(String sessionId, Board board) throws CargoMazePersistanceException {
+        Query query = new Query(Criteria.where(GAME_SESSION_ID).is(sessionId));
+        Update updateBoard = new Update().set("board", board).set("locked", false);
+        FindAndModifyOptions options = new FindAndModifyOptions().returnNew(true).upsert(true);
+        return mongoTemplate.findAndModify(query, updateBoard, options, GameSession.class);
     }
 
+    @Override
+    public GameSession updateGameSessionLocked(String sessionId, boolean locked) throws CargoMazePersistanceException{
+        Query query = new Query(Criteria.where(GAME_SESSION_ID).is(sessionId));
+        Update updateLocked = new Update().set("locked", locked);
+        FindAndModifyOptions options = new FindAndModifyOptions().returnNew(true).upsert(true);
+        return mongoTemplate.findAndModify(query, updateLocked, options, GameSession.class);
+    }
 
     @Override
-    public GameSession updateGameSessionStatus(String sessionId, GameStatus status, long clientTimestamp )throws CargoMazePersistanceException {
-        Query query = new Query(Criteria.where(GAME_SESSION_ID).is(sessionId).and("lastModified").is(clientTimestamp));
-        Update updateStatus = new Update().set("status", status).set("lastModified", System.currentTimeMillis());
-        FindAndModifyOptions options = new FindAndModifyOptions().returnNew(true).upsert(false);
+    public GameSession updateGameSessionStatus(String sessionId, GameStatus status)
+            throws CargoMazePersistanceException {
+        Query query = new Query(Criteria.where(GAME_SESSION_ID).is(sessionId));
+        Update updateStatus = new Update().set("status", status);
+        FindAndModifyOptions options = new FindAndModifyOptions().returnNew(true).upsert(true);
         return mongoTemplate.findAndModify(query, updateStatus, options, GameSession.class);
     }
 
@@ -268,32 +262,6 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
     }
 
     @Override
-    public Box getBoxWithTime(String gameSessionId, String boxId, long cellTimeSpam) throws CargoMazePersistanceException {
-        Aggregation aggregation = Aggregation.newAggregation(
-                // Filtrar por el gameSessionId
-                Aggregation.match(Criteria.where("_id").is(gameSessionId)),
-                // Descomponer el array 'board.boxes'
-                Aggregation.unwind("$board.boxes"),
-                // Filtrar por el boxId
-                Aggregation.match(Criteria.where("board.boxes._id").is(boxId)),
-                // Reemplazar el root por la celda encontrada
-                Aggregation.replaceRoot("$board.boxes"),
-                //Time
-                Aggregation.match(Criteria.where("lastModified").is(cellTimeSpam)));
-
-        // Ejecutar la consulta
-        AggregationResults<Box> result = mongoTemplate.aggregate(aggregation, "gameSession", Box.class);
-        // Obtener el resultado único
-        Box box = result.getUniqueMappedResult();
-        // Si no se encuentra el box, lanzamos una excepción personalizada
-        if (box == null) {
-            throw new CargoMazePersistanceException(CargoMazePersistanceException.BOX_NOT_FOUND);
-        }
-
-        return box;
-    }
-
-    @Override
     public Box getBox(String gameSessionId, String boxId) throws CargoMazePersistanceException {
         Aggregation aggregation = Aggregation.newAggregation(
                 // Filtrar por el gameSessionId
@@ -302,7 +270,7 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
                 Aggregation.unwind("$board.boxes"),
                 // Filtrar por el boxId
                 Aggregation.match(Criteria.where("board.boxes._id").is(boxId)),
-                // Reemplazar el root por la celda encontrada
+                // Reemplazar la raíz con el objeto de la caja
                 Aggregation.replaceRoot("$board.boxes"));
 
         // Ejecutar la consulta
@@ -346,8 +314,7 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
     }
 
     @Override
-    public Cell getCellAtWithTime(String gameSessionId, int x, int y, long cellTimeSpam) throws CargoMazePersistanceException {
-        // Crear el pipeline de agregación
+    public Cell getCellAt(String gameSessionId, int x, int y) throws CargoMazePersistanceException {
         Aggregation aggregation = Aggregation.newAggregation(
                 // Filtrar por el ID de la sesión
                 Aggregation.match(Criteria.where("_id").is(gameSessionId)),
@@ -359,8 +326,9 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
                         .and(ArrayOperators.ArrayElemAt.arrayOf("$cells").elementAt(y)).as("cell"),
                 // Reemplazar el root por la celda encontrada
                 Aggregation.replaceRoot("cell"),
-                // Validar que el timestamp de la celda coincida con el esperado
-                Aggregation.match(Criteria.where("lastModified").is(cellTimeSpam)));
+
+                Aggregation.match(Criteria.where("locked").is(false)));
+
         // Ejecutar la agregación sobre la colección "gameSession" y obtener el
         // resultado mapeado a Cell
         AggregationResults<Cell> result = mongoTemplate.aggregate(aggregation, "gameSession", Cell.class);
@@ -370,65 +338,32 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
         if (cell == null) {
             throw new CargoMazePersistanceException(CargoMazePersistanceException.CELL_NOT_FOUND);
         }
-
         return cell;
     }
 
     @Override
-    public Cell getCellAt(String gameSessionId, int x, int y) throws CargoMazePersistanceException {
-        // Crear el pipeline de agregación
+    public Box getBoxAt(String gameSessionId, Position boxPosition) throws CargoMazePersistanceException {
         Aggregation aggregation = Aggregation.newAggregation(
-                // Filtrar por el ID de la sesión
+                // Filtrar por el gameSessionId
                 Aggregation.match(Criteria.where("_id").is(gameSessionId)),
-                // Proyectar para obtener el primer elemento de "board.cells"
-                Aggregation.project()
-                        .and(ArrayOperators.ArrayElemAt.arrayOf("$board.cells").elementAt(x)).as("cells"),
-                // Proyectar el primer elemento de "cells" (en este caso la celda que queremos)
-                Aggregation.project()
-                        .and(ArrayOperators.ArrayElemAt.arrayOf("$cells").elementAt(y)).as("cell"),
-                // Reemplazar el root por la celda encontrada
-                Aggregation.replaceRoot("cell"));
-        // Ejecutar la agregación sobre la colección "gameSession" y obtener el
-        // resultado mapeado a Cell
-        AggregationResults<Cell> result = mongoTemplate.aggregate(aggregation, "gameSession", Cell.class);
-        // Obtener el único resultado mapeado
-        Cell cell = result.getUniqueMappedResult();
-        // Si no se encuentra la celda, lanzar una excepción
-        if (cell == null) {
-            throw new CargoMazePersistanceException(CargoMazePersistanceException.CELL_NOT_FOUND);
+                // Descomponer el array 'board.boxes'
+                Aggregation.unwind("$board.boxes"),
+                // Filtrar por el boxId
+                Aggregation.match(Criteria.where("board.boxes.position.x").is(boxPosition.getX())
+                        .and("board.boxes.position.y").is(boxPosition.getY())),
+                // Reemplazar la raíz con el objeto de la caja
+                Aggregation.replaceRoot("$board.boxes"));
+
+        // Ejecutar la consulta
+        AggregationResults<Box> result = mongoTemplate.aggregate(aggregation, "gameSession", Box.class);
+        // Obtener el resultado único
+        Box box = result.getUniqueMappedResult();
+        // Si no se encuentra el box, lanzamos una excepción personalizada
+        if (box == null) {
+            throw new CargoMazePersistanceException(CargoMazePersistanceException.BOX_NOT_FOUND);
         }
 
-        return cell;
+        return box;
+
     }
-
-
-    private boolean isValidPlayerMove(Position currentPosition, Position newPosition, Board board) {
-        return currentPosition.isAdjacent(newPosition) && board.isValidPosition(newPosition)
-                && !board.hasWallAt(newPosition) && !board.isPlayerAt(newPosition);
-    }
-
-    private Position getPositionFromMovingABox(Position boxPosition, Position playerPosition) {
-        // Eje y del jugador es menor al de la caja
-        if (playerPosition.getY() < boxPosition.getY()) {
-            return new Position(boxPosition.getX(), boxPosition.getY() + 1);
-        }
-        // Eje y del jugador es mayor al de la caja
-        else if (playerPosition.getY() > boxPosition.getY()) {
-            return new Position(boxPosition.getX(), boxPosition.getY() - 1);
-        }
-        // Eje x del jugador es menor al de la caja
-        else if (playerPosition.getX() < boxPosition.getX()) {
-            return new Position(boxPosition.getX() + 1, boxPosition.getY());
-        }
-        return new Position(boxPosition.getX() - 1, boxPosition.getY());
-    }
-
-    private boolean isValidBoxMove(Player player, Box box, Position currentPosition, Board board) {
-        return player.getPosition().isAdjacent(box.getPosition()) &&
-                board.isValidPosition(currentPosition) &&
-                !board.hasWallAt(currentPosition) &&
-                !board.hasBoxAt(currentPosition) &&
-                !board.isPlayerAt(currentPosition);
-    }
-
 }

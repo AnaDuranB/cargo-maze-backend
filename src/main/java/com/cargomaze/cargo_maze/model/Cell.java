@@ -3,7 +3,6 @@ package com.cargomaze.cargo_maze.model;
 import java.util.UUID;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document
 public class Cell {
@@ -17,26 +16,30 @@ public class Cell {
     public static final String BOX_ON_TARGET =  "BOX_ON_TARGET";
     public static final String PLAYER_ON_TARGET =  "PLAYER_ON_TARGET";
     private String state = "";
-    private long lastModified;
+    private Boolean locked = false;
 
     public Cell(String state){
         this.state = state;
         id = UUID.randomUUID().toString();
-        lastModified = System.currentTimeMillis();
     }
 
     public void setState(String newState){
         if(state.equals(Cell.TARGET) && newState.equals(Cell.BOX)){
             state = Cell.BOX_ON_TARGET;
+            
         }
         else if((state.equals(Cell.TARGET) && newState.equals(Cell.PLAYER)) || (state.equals(Cell.BOX_ON_TARGET) && newState.equals(Cell.PLAYER)) ){
             state = Cell.PLAYER_ON_TARGET; 
+            
         }
         else if((state.equals(Cell.BOX_ON_TARGET) || state.equals(Cell.PLAYER_ON_TARGET))&& newState.equals(Cell.EMPTY)){
             state = Cell.TARGET;
         }
         else{
             state = newState;
+        }
+        if(state.equals(Cell.BOX) || state.equals(Cell.PLAYER)){
+    
         }
     }
 
@@ -48,12 +51,13 @@ public class Cell {
         return id;
     }
 
-    public void setLastModified(Long time){
-        lastModified = time;
+
+    public void setLocked(boolean locked){
+        this.locked = locked;
     }
 
-    public long getLastModified(){
-        return lastModified;
+    public boolean isLocked(){
+        return locked;
     }
 
     @Override

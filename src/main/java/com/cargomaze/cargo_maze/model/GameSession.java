@@ -6,7 +6,6 @@ import java.util.LinkedList;
 import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document
 public class GameSession {
@@ -16,14 +15,13 @@ public class GameSession {
     private GameStatus status;
     private Board board;
     private LinkedList<Integer> indexes = new LinkedList<>(Arrays.asList(0, 1, 2, 3));
-    private long lastModified;
+    private boolean locked = false;
 
     public GameSession(String sessionId) {
         this.sessionId = sessionId;
         players = new ArrayList<>();
         status = GameStatus.WAITING_FOR_PLAYERS;
         board = new Board(); //Sera una instancia inyectada (para más mapas en el futuro)
-        lastModified = System.currentTimeMillis();
     }
 
 
@@ -69,13 +67,7 @@ public class GameSession {
         return sessionId;
     }
 
-    public void setLastModified(Long time){
-        lastModified = time;
-    }
 
-    public long getLastModified(){
-        return lastModified;
-    }
 
     public List<Player> getPlayers() {
         return players;
@@ -122,6 +114,12 @@ public class GameSession {
         //indexes.addAll(Arrays.asList(0, 1, 2, 3));
     }
 
+    public void setLocked(boolean locked){
+        this.locked = locked;
+    }
 
+    public boolean isLocked(){
+        return locked;
+    }
 }
 

@@ -2,23 +2,19 @@ package com.cargomaze.cargo_maze.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document
 public class Box {
     @Id
     private String id;
-
-    private long lastModified;
     private Position position;
     private boolean isAtTarget;
-    
+    private boolean locked = false;
 
     public Box(String id, Position position) {
         this.id = id;
         this.position = position;
         this.isAtTarget = false;
-        lastModified = System.currentTimeMillis();
     }
 
     public void move(Position newPosition){
@@ -28,8 +24,6 @@ public class Box {
     public void setAtTarget(boolean atTarget) {
         isAtTarget = atTarget;
     }
-
-    
 
     // getters :)
     public String getId() {
@@ -43,12 +37,12 @@ public class Box {
         return isAtTarget;
     }
 
-    public void setLastModified(Long time){
-        lastModified = time;
+    public void setLocked(boolean locked){
+        this.locked = locked;
     }
 
-    public long getLastModified(){
-        return lastModified;
+    public boolean isLocked(){
+        return locked;
     }
 
     @Override
