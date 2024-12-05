@@ -67,7 +67,7 @@ public interface CargoMazeDAL {
 
     Cell getCellAt(String gameSessionId, int x, int y) throws CargoMazePersistanceException;
 
-    boolean updateCellAt(String gameSessionId, Position position, Cell cell) throws CargoMazePersistanceException;
+    boolean updateCellStateAt(String gameSessionId, Position position, String cell) throws CargoMazePersistanceException;
 
     boolean updateBoxAtIndex(String gameSessionId, int index, Box box) throws CargoMazePersistanceException;
 

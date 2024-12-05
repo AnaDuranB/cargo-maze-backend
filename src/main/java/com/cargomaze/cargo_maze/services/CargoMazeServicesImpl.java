@@ -89,13 +89,13 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
         if (player.getIndex() != -1) {
             throw new CargoMazePersistanceException(CargoMazePersistanceException.PLAYER_ALREADY_IN_SESSION);
         }
-        session.addPlayer(player);
+        session.addPlayer(player);// habria que cambiarlo para no generar comflictos 
 
         if (session.getPlayers().size() == 4 && session.getPlayers().stream().allMatch(Player::isReady)) {
-            session.setStatus(GameStatus.IN_PROGRESS);
+            session.setStatus(GameStatus.IN_PROGRESS);// habria que cambiarlo para no generar comflictos 
         }
-        persistance.updateGameSession(session);
-        return persistance.updatePlayer(player);
+        persistance.updateGameSession(session); // habria que cambiarlo para no generar comflictos 
+        return persistance.updatePlayer(player); // se puede dejar
     }
 
     @Override
@@ -178,7 +178,7 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
     public Box getBoxAt(String gameSessionId, int x, int y) throws CargoMazePersistanceException {
         return persistance.getBoxAt(gameSessionId, new Position(x, y));
     }
-    
+
     @Override
     public Box getBoxAtIndex(String gameSessionId, int index) throws CargoMazePersistanceException{
         return persistance.getBoxAtIndex(gameSessionId, index);
@@ -222,8 +222,8 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
             Cell cell2 = getCellAt(sessionId, newPosition.getX(), newPosition.getY());
             cell2.setState(Cell.PLAYER);
 
-            persistance.updateCellAt(sessionId, currentPos, cell1); 
-            persistance.updateCellAt(sessionId, newPosition, cell2);
+            persistance.updateCellStateAt(sessionId, currentPos, cell1.getState()); 
+            persistance.updateCellStateAt(sessionId, newPosition, cell2.getState());
             persistance.updatePlayerPosition(player.getNickname(), newPosition);
         } catch (Exception e) { 
 
@@ -256,9 +256,9 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
                 Cell cell1 = getCellAt(gameSessionId, boxNewPosition.getX(), boxNewPosition.getY());
                 cell1.setState(Cell.BOX);
                 box.setLocked(false);
+
                 persistance.updateBoxAtIndex(gameSessionId, boxIndex, box);
-                cell1.setLocked(false);
-                persistance.updateCellAt(gameSessionId, boxNewPosition, cell1);
+                persistance.updateCellStateAt(gameSessionId, boxNewPosition, cell1.getState());
             } 
             catch (Exception e) {
                 return false;
