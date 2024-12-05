@@ -200,7 +200,7 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
             boolean hasBoxAt = board.hasBoxAt(newPosition);
             if (hasBoxAt) {
                 boxNewPosition = getPositionFromMovingABox(newPosition, currentPos);
-                boxIndex = board.getBoxAt(currentPos).getIndex();
+                boxIndex = board.getBoxAt(newPosition).getIndex();
                 boolean moveBox = moveBox(player, currentPos, newPosition, boxNewPosition,board, session, boxIndex);
                 if (!moveBox) {
                     System.out.println("Error moving box");
