@@ -50,4 +50,6 @@ public interface CargoMazeServices {
     Cell getCellAt(String gameSessionId, int x, int y) throws CargoMazePersistanceException;
 
     Box getBoxAt(String gameSessionId, int x, int y) throws CargoMazePersistanceException;
+
+    Box getBoxAtIndex(String gameSessionId, int index) throws CargoMazePersistanceException;
 }

@@ -15,6 +15,7 @@ import com.cargomaze.cargo_maze.persistance.exceptions.CargoMazePersistanceExcep
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.mongodb.core.query.Criteria;
 
 @Repository
@@ -314,6 +315,7 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
     }
 
     @Override
+    @Transactional
     public Cell getCellAt(String gameSessionId, int x, int y) throws CargoMazePersistanceException {
         Aggregation aggregation = Aggregation.newAggregation(
                 // Filtrar por el ID de la sesión
@@ -342,17 +344,26 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
     }
 
     @Override
-    public Box getBoxAt(String gameSessionId, Position boxPosition) throws CargoMazePersistanceException {
+    public Box getBoxAtIndex(String gameSessionId, int index) throws CargoMazePersistanceException{
+        String queryString = "board.boxes."+index+".locked";
+        Query query = new Query(Criteria.where(GAME_SESSION_ID).is(gameSessionId)
+        .and(queryString).is(false)); // Filtra cajas desbloqueadas
+
+        Update update = new Update().set(queryString, true);
+        FindAndModifyOptions options = new FindAndModifyOptions().returnNew(true).upsert(false);
+        if(mongoTemplate.findAndModify(query, update, options, GameSession.class) == null){
+            throw new CargoMazePersistanceException(CargoMazePersistanceException.BOX_NOT_FOUND);
+        }
+
         Aggregation aggregation = Aggregation.newAggregation(
-                // Filtrar por el gameSessionId
-                Aggregation.match(Criteria.where("_id").is(gameSessionId)),
-                // Descomponer el array 'board.boxes'
-                Aggregation.unwind("$board.boxes"),
-                // Filtrar por el boxId
-                Aggregation.match(Criteria.where("board.boxes.position.x").is(boxPosition.getX())
-                        .and("board.boxes.position.y").is(boxPosition.getY())),
-                // Reemplazar la raíz con el objeto de la caja
-                Aggregation.replaceRoot("$board.boxes"));
+            // Filtrar por el gameSessionId
+            Aggregation.match(Criteria.where("_id").is(gameSessionId)),
+            // Descomponer el array 'board.boxes'
+            Aggregation.project().and(ArrayOperators.ArrayElemAt.arrayOf("$board.boxes").elementAt(index)).as("box"),
+
+            Aggregation.replaceRoot("$box")
+            
+        );
 
         // Ejecutar la consulta
         AggregationResults<Box> result = mongoTemplate.aggregate(aggregation, "gameSession", Box.class);
@@ -364,6 +375,36 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
         }
 
         return box;
+           
+        
 
+    }
+
+    @Override
+    @Transactional
+    public Box getBoxAt(String gameSessionId, Position boxPosition) throws CargoMazePersistanceException {
+        Aggregation aggregation = Aggregation.newAggregation(
+                // Filtrar por el gameSessionId
+                Aggregation.match(Criteria.where("_id").is(gameSessionId)),
+                // Descomponer el array 'board.boxes'
+                Aggregation.unwind("$board.boxes"),
+                // Filtrar por el boxId
+                Aggregation.match(Criteria.where("board.boxes.position.x").is(boxPosition.getX())
+                        .and("board.boxes.position.y").is(boxPosition.getY())),
+                // Reemplazar la raíz con el objeto de la caja
+                Aggregation.replaceRoot("$board.boxes"),
+
+                Aggregation.match(Criteria.where("locked").is(false)));
+
+        // Ejecutar la consulta
+        AggregationResults<Box> result = mongoTemplate.aggregate(aggregation, "gameSession", Box.class);
+        // Obtener el resultado único
+        Box box = result.getUniqueMappedResult();
+        // Si no se encuentra el box, lanzamos una excepción personalizada
+        if (box == null) {
+            throw new CargoMazePersistanceException(CargoMazePersistanceException.BOX_NOT_FOUND);
+        }
+
+        return box;
     }
 }

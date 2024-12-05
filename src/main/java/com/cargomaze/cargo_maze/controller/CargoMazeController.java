@@ -230,4 +230,13 @@ public class CargoMazeController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
         }
     }
+
+    @GetMapping("/sessions/{id}/boxes/index/{index}")
+    public ResponseEntity<?> getBoxAtIndex(@PathVariable String id, @PathVariable int index) {
+        try {
+            return new ResponseEntity<>(cargoMazeServices.getBoxAtIndex(id, index), HttpStatus.ACCEPTED);
+        } catch (CargoMazePersistanceException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
+        }
+    }
 }

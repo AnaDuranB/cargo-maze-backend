@@ -58,6 +58,8 @@ public interface CargoMazeDAL {
 
     Box getBoxAt(String gameSessionId, Position boxPosition) throws CargoMazePersistanceException;
 
+    Box getBoxAtIndex(String gameSessionId, int index) throws CargoMazePersistanceException;    
+
     List<Box> getBoxes(String gameSessionId) throws CargoMazePersistanceException;
 
     Cell getCellAt(String gameSessionId, int x, int y) throws CargoMazePersistanceException;

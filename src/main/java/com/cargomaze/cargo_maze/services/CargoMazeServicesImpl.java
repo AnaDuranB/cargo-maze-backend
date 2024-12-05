@@ -188,12 +188,16 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
     public Box getBoxAt(String gameSessionId, int x, int y) throws CargoMazePersistanceException {
         return persistance.getBoxAt(gameSessionId, new Position(x, y));
     }
+    @Override
+    public Box getBoxAtIndex(String gameSessionId, int index) throws CargoMazePersistanceException{
+        return persistance.getBoxAtIndex(gameSessionId, index);
+    }
 
     @Override
     
     public boolean move(String playerId, String gameSessionId, Position direction) throws CargoMazePersistanceException, CargoMazeServicesException {
         Player player = persistance.getPlayerInSessionBlockingIt(gameSessionId, playerId);
-        GameSession session = persistance.getSessionBlockingIt(gameSessionId);
+        GameSession session = persistance.getSession(gameSessionId);
         if (!session.getStatus().equals(GameStatus.IN_PROGRESS)) {
             throw new CargoMazeServicesException(CargoMazeServicesException.SESSION_IS_NOT_IN_PROGRESS);
         }
@@ -207,7 +211,6 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
                 if (!moveBox) {
                     System.out.println("Error moving box");
                     persistance.updatePlayerLocked(playerId, false);
-                    persistance.updateGameSessionLocked(gameSessionId, false);
                     return false;
                 }
             }
@@ -233,11 +236,10 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
             persistance.updatePlayerPosition(player.getNickname(), newPosition);
         } catch (Exception e) {
             persistance.updatePlayerLocked(player.getNickname(), false);
-            persistance.updateGameSessionLocked(session.getSessionId(), false);
+            
             return false;
         }
         persistance.updatePlayerLocked(player.getNickname(), false);
-        persistance.updateGameSessionLocked(session.getSessionId(), false);
         return true;
     }
 
