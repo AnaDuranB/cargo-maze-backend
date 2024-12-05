@@ -215,8 +215,7 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
     
     public boolean movePlayer(Player player, Board board, Position newPosition, Position currentPos, GameSession session, String sessionId) throws CargoMazePersistanceException {
         try {  
-            persistance.updatePlayerPosition(player.getNickname(), newPosition);
-
+            
             Cell cell1 = getCellAt(sessionId, currentPos.getX(), currentPos.getY());
             cell1.setState(Cell.EMPTY);
             Cell cell2 = getCellAt(sessionId, newPosition.getX(), newPosition.getY());
@@ -226,12 +225,14 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
             board.setCellAt(newPosition, cell2);
 
             persistance.updateGameSessionBoard(session.getSessionId(), board);
-            
+            persistance.updatePlayerPosition(player.getNickname(), newPosition);
         } catch (Exception e) {
             persistance.updatePlayerLocked(player.getNickname(), false);
             persistance.updateGameSessionLocked(session.getSessionId(), false);
             return false;
         }
+        persistance.updatePlayerLocked(player.getNickname(), false);
+        persistance.updateGameSessionLocked(session.getSessionId(), false);
         return true;
     }
 
