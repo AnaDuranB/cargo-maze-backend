@@ -202,12 +202,13 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
                     board.setCellAt(currentPosition, cell1);
                     board.setCellAt(newPosition, cell2);
                     gameSession.setBoard(board);
-
-                    if(getPlayerInSession(sessionId, playerId).getLastModified()!= playerTimestamp){
+                    long actualTimestamp = getPlayerInSession(sessionId, playerId).getLastModified();
+                    if(actualTimestamp!= playerTimestamp){
+                        System.out.println(" Supuesta timeSpam actual " +  actualTimestamp + " TimeSpam del jugador entrando " + playerTimestamp);
                         throw new CargoMazeServicesException(CargoMazePersistanceException.FAILED_TRANSACTION);
                     }
 
-                    updatePlayerPosition(playerId, newPosition, System.currentTimeMillis());
+                    updatePlayerPosition(playerId, newPosition, playerTimestamp);
 
                     board.getCellAt(currentPosition).setLastModified(System.currentTimeMillis());
                     board.getCellAt(newPosition).setLastModified(System.currentTimeMillis());
