@@ -15,7 +15,6 @@ public class GameSession {
     private GameStatus status;
     private Board board;
     private LinkedList<Integer> indexes = new LinkedList<>(Arrays.asList(0, 1, 2, 3));
-    private boolean locked = false;
 
     public GameSession(String sessionId) {
         this.sessionId = sessionId;
@@ -111,17 +110,9 @@ public class GameSession {
 
     public void resetGame(){
         status = GameStatus.RESETING_GAME;
-        locked = false;
         board.reset();
         //indexes.addAll(Arrays.asList(0, 1, 2, 3));
     }
 
-    public void setLocked(boolean locked){
-        this.locked = locked;
-    }
-
-    public boolean isLocked(){
-        return locked;
-    }
 }
 

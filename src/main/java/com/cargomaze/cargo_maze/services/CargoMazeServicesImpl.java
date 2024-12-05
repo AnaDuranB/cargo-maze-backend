@@ -160,16 +160,6 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
     }
 
     @Override
-    public Box getBox(String gameSessionId, String boxId) throws CargoMazePersistanceException {
-        return persistance.getBox(gameSessionId, boxId);
-    }
-
-    @Override
-    public List<Box> getBoxes(String gameSessionId) throws CargoMazePersistanceException {
-        return persistance.getBoxes(gameSessionId);
-    }
-
-    @Override
     public Cell getCellAt(String gameSessionId, int x, int y) throws CargoMazePersistanceException {
         return persistance.getCellAt(gameSessionId, x, y);
     }
@@ -188,6 +178,7 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
     public Box getBoxAt(String gameSessionId, int x, int y) throws CargoMazePersistanceException {
         return persistance.getBoxAt(gameSessionId, new Position(x, y));
     }
+    
     @Override
     public Box getBoxAtIndex(String gameSessionId, int index) throws CargoMazePersistanceException{
         return persistance.getBoxAtIndex(gameSessionId, index);
@@ -198,7 +189,7 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
         Player player = persistance.getPlayerInSessionBlockingIt(gameSessionId, playerId);
         GameSession session = persistance.getSession(gameSessionId);
         if (!session.getStatus().equals(GameStatus.IN_PROGRESS)) {
-            throw new CargoMazeServicesException(CargoMazeServicesException.SESSION_IS_NOT_IN_PROGRESS); // o si? xd 
+            throw new CargoMazeServicesException(CargoMazeServicesException.SESSION_IS_NOT_IN_PROGRESS); // depronto problemas con condicion de carrera
         }
         Position newPosition = new Position(player.getPosition().getX() + direction.getX(),player.getPosition().getY() + direction.getY());
         Position currentPos = player.getPosition();
@@ -217,24 +208,25 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
                     return false;
                 }
             }
-            return movePlayer(player, board, newPosition, currentPos, session, session.getSessionId());
+            return movePlayer(player, newPosition, currentPos,  session.getSessionId());
         }
         persistance.updatePlayerLocked(playerId, false);
         return false;
     }
 
     
-    private boolean movePlayer(Player player, Board board, Position newPosition, Position currentPos, GameSession session, String sessionId) throws CargoMazePersistanceException {
+    private boolean movePlayer(Player player, Position newPosition, Position currentPos, String sessionId) throws CargoMazePersistanceException {
         try {  
             Cell cell1 = getCellAt(sessionId, currentPos.getX(), currentPos.getY());
             cell1.setState(Cell.EMPTY);
             Cell cell2 = getCellAt(sessionId, newPosition.getX(), newPosition.getY());
             cell2.setState(Cell.PLAYER);
-            board.setCellAt(currentPos, cell1);
-            board.setCellAt(newPosition, cell2);
-            persistance.updateGameSessionBoard(session.getSessionId(), board);
+
+            persistance.updateCellAt(sessionId, currentPos, cell1); 
+            persistance.updateCellAt(sessionId, newPosition, cell2);
             persistance.updatePlayerPosition(player.getNickname(), newPosition);
         } catch (Exception e) { 
+
             persistance.updatePlayerLocked(player.getNickname(), false);
             return false;
         }
@@ -264,13 +256,11 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
                 Cell cell1 = getCellAt(gameSessionId, boxNewPosition.getX(), boxNewPosition.getY());
                 cell1.setState(Cell.BOX);
                 box.setLocked(false);
-                board.setBoxInList(box);
+                persistance.updateBoxAtIndex(gameSessionId, boxIndex, box);
                 cell1.setLocked(false);
-                board.setCellAt(boxNewPosition, cell1);
-                session.setBoard(board);
+                persistance.updateCellAt(gameSessionId, boxNewPosition, cell1);
             } 
             catch (Exception e) {
-                persistance.unblockBoxAtIndex(gameSessionId,boxIndex);
                 return false;
             }
             return true;

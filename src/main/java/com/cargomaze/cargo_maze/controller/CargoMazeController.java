@@ -195,6 +195,7 @@ public class CargoMazeController {
         }
     }
 
+    /* 
     @GetMapping("/sessions/{id}/boxes/{boxId}")
     public ResponseEntity<?> getBox(@PathVariable String id, @PathVariable String boxId) {
         try {
@@ -202,21 +203,12 @@ public class CargoMazeController {
         } catch (CargoMazePersistanceException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
         }
-    }
+    }*/
 
     @GetMapping("/sessions/{id}/boxes/{x}/{y}")
     public ResponseEntity<?> getBoxAt(@PathVariable String id, @PathVariable int x, @PathVariable int y) {
         try {
             return new ResponseEntity<>(cargoMazeServices.getBoxAt(id, x, y), HttpStatus.ACCEPTED);
-        } catch (CargoMazePersistanceException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
-        }
-    }
-
-    @GetMapping("/sessions/{id}/boxes")
-    public ResponseEntity<?> getBoxes(@PathVariable String id) {
-        try {
-            return new ResponseEntity<>(cargoMazeServices.getBoxes(id), HttpStatus.ACCEPTED);
         } catch (CargoMazePersistanceException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
         }
