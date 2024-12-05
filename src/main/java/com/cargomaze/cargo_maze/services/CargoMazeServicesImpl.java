@@ -185,12 +185,14 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
     }
 
     @Override
+    @Transactional
     public boolean move(String playerId, String gameSessionId, Position direction) throws CargoMazePersistanceException, CargoMazeServicesException {
         Player player = persistance.getPlayerInSession(gameSessionId, playerId);
         GameSession session = persistance.getSession(gameSessionId);
         if (!session.getStatus().equals(GameStatus.IN_PROGRESS)) {
             throw new CargoMazeServicesException(CargoMazeServicesException.SESSION_IS_NOT_IN_PROGRESS);
         }
+
         Position newPosition = new Position(player.getPosition().getX() + direction.getX(),player.getPosition().getY() + direction.getY());
         Position currentPos = player.getPosition();
         Board board = session.getBoard();
