@@ -3,6 +3,7 @@ package com.cargomaze.cargo_maze.model;
 import java.util.UUID;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document
 public class Cell {
@@ -16,9 +17,12 @@ public class Cell {
     public static final String BOX_ON_TARGET =  "BOX_ON_TARGET";
     public static final String PLAYER_ON_TARGET =  "PLAYER_ON_TARGET";
     private String state = "";
+    private long lastModified;
+
     public Cell(String state){
         this.state = state;
         id = UUID.randomUUID().toString();
+        lastModified = System.currentTimeMillis();
     }
 
     public void setState(String newState){
@@ -42,6 +46,14 @@ public class Cell {
 
     public String getId(){
         return id;
+    }
+
+    public void setLastModified(Long time){
+        lastModified = time;
+    }
+
+    public long getLastModified(){
+        return lastModified;
     }
 
     @Override
