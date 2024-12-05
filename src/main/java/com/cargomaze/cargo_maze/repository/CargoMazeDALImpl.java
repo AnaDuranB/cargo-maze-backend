@@ -184,6 +184,7 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
             try {
                 GameSession gameSession = getSession(sessionId);
                 Player player = getPlayerInSession(sessionId, playerId);
+                long playerTimestamp = player.getLastModified();
                 if (!gameSession.getStatus().equals(GameStatus.IN_PROGRESS)) {
                         throw new CargoMazeServicesException(CargoMazeServicesException.SESSION_IS_NOT_IN_PROGRESS);
                 }
@@ -201,20 +202,21 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
                     board.setCellAt(currentPosition, cell1);
                     board.setCellAt(newPosition, cell2);
                     gameSession.setBoard(board);
-                    /*Cell cell1 = getCellAtWithTime(sessionId, currentPosition.getX(), currentPosition.getY(), timestampCell1);
-                    Cell cell2 = getCellAtWithTime(sessionId, newPosition.getX(), newPosition.getY(), timestampCell2);
-                    if(cell1 == null || cell2 == null){
-                        throw new CargoMazePersistanceException(CargoMazePersistanceException.FAILED_TRANSACTION);
-                    }*/
+
+                    if(getPlayerInSession(sessionId, playerId).getLastModified()!= playerTimestamp){
+                        throw new CargoMazeServicesException(CargoMazePersistanceException.FAILED_TRANSACTION);
+                    }
+
+                    updatePlayerPosition(playerId, newPosition, System.currentTimeMillis());
+
                     board.getCellAt(currentPosition).setLastModified(System.currentTimeMillis());
                     board.getCellAt(newPosition).setLastModified(System.currentTimeMillis());
                     Update updateBoard = new Update().set("board", board).set("lastModified", System.currentTimeMillis());
                     FindAndModifyOptions options = new FindAndModifyOptions().returnNew(true).upsert(false);
-                    player.updatePosition(newPosition);
-                    updatePlayerPosition(playerId, newPosition, player.getLastModified());
+                   
                     mongoTemplate.findAndModify(query, updateBoard, options, GameSession.class);
                     System.out.println("Papi le funcionó supuestamente POSICION ORIGINAL " +  currentPosition + " POSICION NUEVA " + newPosition);
-                    System.out.println("Tiempo Cell 1 antes: " + timestampCell1 + " Tiempo Cell 2 antes: " + timestampCell2);
+                    System.out.println("Tiempo Cell 1 antes: " + timestampCell1 + " Tiempo Cell 2 antes: " + timestampCell2 );
                     System.out.println("Tiempo Cell 1 despues: " + board.getCellAt(currentPosition).getLastModified() + " Tiempo Cell 2 despues: " + board.getCellAt(newPosition).getLastModified());
                     session.commitTransaction();
                     
