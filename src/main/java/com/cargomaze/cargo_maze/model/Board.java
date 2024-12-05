@@ -163,7 +163,9 @@ public class Board {
 
     public void addBox(Position position, int index) {
         cells[position.getX()][position.getY()] = new Cell(Cell.BOX);
-        boxes.add(new Box(UUID.randomUUID().toString(), position, index));
+        Box box = new Box(UUID.randomUUID().toString(), position);
+        box.setIndex(index);
+        boxes.add(box);
     }
 
     // getters :)

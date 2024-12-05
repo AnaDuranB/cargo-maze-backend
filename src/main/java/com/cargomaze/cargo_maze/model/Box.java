@@ -11,11 +11,10 @@ public class Box {
     private boolean isAtTarget;
     private boolean locked = false;
     private int index;
-    public Box(String id, Position position, int index) {
+    public Box(String id, Position position) {
         this.id = id;
         this.position = position;
         this.isAtTarget = false;
-        this.index = index;
     }
 
     public void move(Position newPosition){
