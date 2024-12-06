@@ -456,8 +456,7 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
     public boolean updateCellStateAt(String sessionId, Position position, String state){ // dejar
         Query query = new Query(Criteria.where(GAME_SESSION_ID).is(sessionId));
         String stateQuery = "board.cells."+position.getX()+"."+position.getY()+".state";
-        String lockedQuery = "board.cells."+position.getX()+"."+position.getY()+".locked";
-        Update update = new Update().set(stateQuery, state).set(lockedQuery, false);
+        Update update = new Update().set(stateQuery, state);
         FindAndModifyOptions options = new FindAndModifyOptions().returnNew(true).upsert(false);
         return mongoTemplate.findAndModify(query, update, options, GameSession.class) != null;
     }

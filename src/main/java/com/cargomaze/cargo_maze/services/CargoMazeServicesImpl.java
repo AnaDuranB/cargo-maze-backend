@@ -200,9 +200,8 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
             if (hasBoxAt) {
                 boxNewPosition = getPositionFromMovingABox(newPosition, currentPos);
                 boxIndex = board.getBoxAt(newPosition).getIndex();
-                boolean moveBox = moveBox(player, currentPos, newPosition, boxNewPosition,board, gameSessionId, boxIndex);
+                boolean moveBox = moveBox(player, newPosition, boxNewPosition,board, gameSessionId, boxIndex);
                 if (!moveBox) {
-                    System.out.println("Error moving box");
                     persistance.updatePlayerLocked(playerId, false);
                     return false;
                 }
@@ -220,14 +219,11 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
             cell1.setState(Cell.EMPTY);
             Cell cell2 = getCellAt(sessionId, newPosition.getX(), newPosition.getY());
             cell2.setState(Cell.PLAYER);
-
             persistance.updateCellStateAt(sessionId, currentPos, cell1.getState()); 
-            System.out.println("Cell playerwasthere state: " + cell1.getState());
             persistance.updateCellStateAt(sessionId, newPosition, cell2.getState());
-            System.out.println("Cell2 player is there state: " + cell2.getState());
-            persistance.updatePlayerPosition(player.getNickname(), newPosition); 
-            System.out.println("Player moved to: " + newPosition.toString() + " unblocking player");
-
+            persistance.updatePlayerPosition(player.getNickname(), newPosition);
+            persistance.unBlockCellAt(sessionId, currentPos.getX(), currentPos.getY());
+            persistance.unBlockCellAt(sessionId, newPosition.getX(), newPosition.getY());
 
         } catch (Exception e) { 
             persistance.updatePlayerLocked(player.getNickname(), false);
@@ -238,17 +234,14 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
     }
 
     
-    private boolean moveBox(Player player, Position playerPosition, Position boxPosition, Position boxNewPosition, Board board, String gameSessionId, int boxIndex) throws CargoMazePersistanceException {
+    private boolean moveBox(Player player, Position boxPosition, Position boxNewPosition, Board board, String gameSessionId, int boxIndex) throws CargoMazePersistanceException {
         Box box = getBoxAtIndex(gameSessionId, boxIndex);
         if (isValidBoxMove(player, box, boxNewPosition, board)) { // va mover la caja
             try {
                 box.move(boxNewPosition); // se cambia el lugar donde esta la caja
-                System.out.println("Box moved" + box.getPosition().toString());	
                 if (board.isTargetAt(boxNewPosition)) {
                     box.setAtTarget(true);
-                    boolean allOtherBoxesAtTarget = board.getBoxes().stream()
-                            .filter(b -> !b.equals(box))
-                            .allMatch(Box::isAtTarget);
+                    boolean allOtherBoxesAtTarget = board.getBoxes().stream().filter(b -> !b.equals(box)).allMatch(Box::isAtTarget);
                     if (allOtherBoxesAtTarget) {
                         persistance.updateGameSessionStatus(gameSessionId, GameStatus.COMPLETED);
                     }
@@ -261,18 +254,14 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
                 
                 Cell cell2 = getCellAt(gameSessionId, boxPosition.getX(), boxPosition.getY());
                 cell2.setState(Cell.EMPTY);
-
                 box.setLocked(false);
-
-                System.out.println("Cell box state: " + cell1.getState());
-                System.out.println("Cell boxwasthere state: " + cell2.getState());
-
                 persistance.updateBoxAtIndex(gameSessionId, boxIndex, box);
                 persistance.updateCellStateAt(gameSessionId, boxNewPosition, cell1.getState());
                 persistance.updateCellStateAt(gameSessionId, boxPosition, cell2.getState());
+                persistance.unBlockCellAt(gameSessionId, boxPosition.getX(), boxPosition.getY());
+                persistance.unBlockCellAt(gameSessionId, boxNewPosition.getX(), boxNewPosition.getY());
             } 
             catch (Exception e) {
-                System.out.println("Error moving box" + e.getMessage());
                 return false;
             }
             return true;
