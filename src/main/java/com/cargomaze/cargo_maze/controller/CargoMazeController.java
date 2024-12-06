@@ -27,6 +27,11 @@ public class CargoMazeController {
         this.cargoMazeServices = cargoMazeServices;
     }
 
+    @GetMapping()
+    public ResponseEntity<?> getWelcomeMessage() {
+        return new ResponseEntity<>(Map.of("message", "Welcome to Cargo Maze API"), HttpStatus.OK);
+    }
+
     //Session controller
 
     /**
