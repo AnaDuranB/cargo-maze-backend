@@ -2,45 +2,75 @@ package com.cargomaze.cargo_maze.repository;
 
 import java.util.List;
 
-import org.springframework.stereotype.Repository;
-
-import com.cargomaze.cargo_maze.model.GameSession;
-import com.cargomaze.cargo_maze.model.Player;
+import com.cargomaze.cargo_maze.model.*;
 import com.cargomaze.cargo_maze.persistance.exceptions.CargoMazePersistanceException;
-
 
 public interface CargoMazeDAL {
 
-    public Player addPlayer(Player player) throws CargoMazePersistanceException;
+    Player addPlayer(Player player) throws CargoMazePersistanceException;
 
-    public Player getPlayer(String playerId) throws CargoMazePersistanceException;
+    Player getPlayer(String playerId) throws CargoMazePersistanceException;
 
-    public List<Player> getPlayers() throws CargoMazePersistanceException;
+    List<Player> getPlayers() throws CargoMazePersistanceException;
 
-    public void deletePlayer(Player player) throws CargoMazePersistanceException;
+    void deletePlayer(Player player) throws CargoMazePersistanceException;
 
-    public void deletePlayers() throws CargoMazePersistanceException;
+    void deletePlayers() throws CargoMazePersistanceException;
 
-    public Player getPlayerInSession(String playerId, String gameSessionId) throws CargoMazePersistanceException;
+    //Player getPlayerInSession(String playerId, String gameSessionId) throws CargoMazePersistanceException;
 
-    public GameSession addSession(GameSession session) throws CargoMazePersistanceException;
+    Player getPlayerInSessionBlockingIt(String playerId, String gameSessionId) throws CargoMazePersistanceException;
 
-    public GameSession getSession(String gameSessionId) throws CargoMazePersistanceException;
+    GameSession addSession(GameSession session) throws CargoMazePersistanceException;
 
-    public int getPlayerCount(String gameSessionId) throws CargoMazePersistanceException;
+    GameSession getSession(String gameSessionId) throws CargoMazePersistanceException;
 
-    public List<Player> getPlayersInSession(String id) throws CargoMazePersistanceException;
+    //GameSession getSessionBlockingIt(String gameSessionId) throws CargoMazePersistanceException;
 
-    public Player updatePlayerById(String playerId) throws CargoMazePersistanceException;
+    int getPlayerCount(String gameSessionId) throws CargoMazePersistanceException;
 
-    public Player updatePlayer(Player player) throws CargoMazePersistanceException;
+    List<Player> getPlayersInSession(String id) throws CargoMazePersistanceException;
 
-    public GameSession updateGameSessionById(String sessionId) throws CargoMazePersistanceException;
+    Player updatePlayerById(String playerId) throws CargoMazePersistanceException;
 
-    public GameSession updateGameSession(GameSession session) throws CargoMazePersistanceException;
+    Player updatePlayer(Player player) throws CargoMazePersistanceException;
 
-    public void deletePlayer(String playerId) throws CargoMazePersistanceException;   
+    Player updatePlayerPosition(String playerId, Position position) throws CargoMazePersistanceException;
 
-    public void removePlayerFromSession(String playerId, String sessionId) throws CargoMazePersistanceException;
+    Player updatePlayerLocked(String playerId, boolean locked) throws CargoMazePersistanceException;
+
+    GameSession updateGameSessionById(String sessionId) throws CargoMazePersistanceException;
+
+    GameSession updateGameSession(GameSession session) throws CargoMazePersistanceException;
+
+    //GameSession updateGameSessionBoard(String sessionId, Board board) throws CargoMazePersistanceException;
+
+    //GameSession updateGameSessionLocked(String sessionId, boolean locked) throws CargoMazePersistanceException;
+
+    GameStatus getGameSessionStatus(String sessionId) throws CargoMazePersistanceException;
+
+    GameSession updateGameSessionStatus(String sessionId, GameStatus status) throws CargoMazePersistanceException;
+
+    void deletePlayer(String playerId) throws CargoMazePersistanceException;
+
+    void removePlayerFromSession(String playerId, String sessionId) throws CargoMazePersistanceException;
+
+    //Box getBox(String gameSessionId, String boxId) throws CargoMazePersistanceException;
+
+    Box getBoxAt(String gameSessionId, Position boxPosition) throws CargoMazePersistanceException;
+
+    Box getBoxAtIndex(String gameSessionId, int index) throws CargoMazePersistanceException;    
+
+    //List<Box> getBoxes(String gameSessionId) throws CargoMazePersistanceException;
+
+    boolean unblockBoxAtIndex(String gameSessionId, int index) throws CargoMazePersistanceException;
+
+    boolean unBlockCellAt(String gameSessionId, int x, int y) throws CargoMazePersistanceException;
+
+    Cell getCellAt(String gameSessionId, int x, int y) throws CargoMazePersistanceException;
+
+    boolean updateCellStateAt(String gameSessionId, Position position, String cell) throws CargoMazePersistanceException;
+
+    boolean updateBoxAtIndex(String gameSessionId, int index, Box box) throws CargoMazePersistanceException;
 
 }

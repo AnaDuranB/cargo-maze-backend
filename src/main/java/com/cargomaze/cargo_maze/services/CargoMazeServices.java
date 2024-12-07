@@ -2,6 +2,8 @@ package com.cargomaze.cargo_maze.services;
 
 import java.util.List;
 
+import com.cargomaze.cargo_maze.model.Box;
+import com.cargomaze.cargo_maze.model.Cell;
 import com.cargomaze.cargo_maze.model.GameSession;
 import com.cargomaze.cargo_maze.model.Player;
 import com.cargomaze.cargo_maze.model.Position;
@@ -41,4 +43,9 @@ public interface CargoMazeServices {
 
     void removePlayersFromSession(String gameSessionId) throws CargoMazePersistanceException;
 
+    Cell getCellAt(String gameSessionId, int x, int y) throws CargoMazePersistanceException;
+
+    Box getBoxAt(String gameSessionId, int x, int y) throws CargoMazePersistanceException;
+
+    Box getBoxAtIndex(String gameSessionId, int index) throws CargoMazePersistanceException;
 }

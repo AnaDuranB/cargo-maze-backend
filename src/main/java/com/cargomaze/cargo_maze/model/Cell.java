@@ -1,12 +1,13 @@
 package com.cargomaze.cargo_maze.model;
 
 import java.util.UUID;
-import java.util.concurrent.locks.ReentrantLock;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document
 public class Cell {
+    @Id
+    private String id;
     public static final String EMPTY =  "EMPTY";
     public static final String TARGET =  "TARGET";
     public static final String WALL =  "WALL";
@@ -14,23 +15,22 @@ public class Cell {
     public static final String BOX =  "BOX";
     public static final String BOX_ON_TARGET =  "BOX_ON_TARGET";
     public static final String PLAYER_ON_TARGET =  "PLAYER_ON_TARGET";
-    public final ReentrantLock lock;
     private String state = "";
-    @Id
-    private String id;
+    private Boolean locked = false;
 
     public Cell(String state){
         this.state = state;
-        this.lock = new ReentrantLock();
-        this.id = UUID.randomUUID().toString();
+        id = UUID.randomUUID().toString();
     }
 
     public void setState(String newState){
         if(state.equals(Cell.TARGET) && newState.equals(Cell.BOX)){
             state = Cell.BOX_ON_TARGET;
+            
         }
         else if((state.equals(Cell.TARGET) && newState.equals(Cell.PLAYER)) || (state.equals(Cell.BOX_ON_TARGET) && newState.equals(Cell.PLAYER)) ){
             state = Cell.PLAYER_ON_TARGET; 
+            
         }
         else if((state.equals(Cell.BOX_ON_TARGET) || state.equals(Cell.PLAYER_ON_TARGET))&& newState.equals(Cell.EMPTY)){
             state = Cell.TARGET;
@@ -38,10 +38,26 @@ public class Cell {
         else{
             state = newState;
         }
+        if(state.equals(Cell.BOX) || state.equals(Cell.PLAYER)){
+    
+        }
     }
 
     public String getState(){
         return state;
+    }
+
+    public String getId(){
+        return id;
+    }
+
+
+    public void setLocked(boolean locked){
+        this.locked = locked;
+    }
+
+    public boolean isLocked(){
+        return locked;
     }
 
     @Override
@@ -53,6 +69,6 @@ public class Cell {
             return false;
         }
         Cell cell = (Cell) obj;
-        return cell.id.equals(this.id);
+        return cell.getId().equals(this.id);
     }
 }

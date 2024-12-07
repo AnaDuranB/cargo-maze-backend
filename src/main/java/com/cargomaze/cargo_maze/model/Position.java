@@ -2,9 +2,7 @@ package com.cargomaze.cargo_maze.model;
 
 import java.util.Objects;
 import java.util.UUID;
-
 import org.springframework.data.mongodb.core.mapping.Document;
-
 import org.springframework.data.annotation.Id;
 
 @Document

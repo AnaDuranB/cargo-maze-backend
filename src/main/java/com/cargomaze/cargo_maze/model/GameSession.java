@@ -1,6 +1,5 @@
 package com.cargomaze.cargo_maze.model;
 
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -67,6 +66,8 @@ public class GameSession {
         return sessionId;
     }
 
+
+
     public List<Player> getPlayers() {
         return players;
     }
@@ -96,17 +97,23 @@ public class GameSession {
     }
 
     public void removePlayer(Player player) {
-        board.setCellState(player.getPosition(), Cell.EMPTY);
-        System.out.println(players.remove(player));
-        indexes.add(player.getIndex());
+        board.setCellState(player.getPosition(), Cell.EMPTY); //problemas de concurrencia
+        indexes.add(player.getIndex()); //problemas de concurrencia
+        players.remove(player); //problemas de concurrencia
+
+        //Se podria dejar y guardar unicamente el jugador, habria que bloquearlo completamente, entonces depronto haya que cambiarlo
         player.setIndex(-1);
         player.updatePosition(null);
+        player.setGameSession(null);
+        player.setReady(false);
+        player.setLocked(false);
     }
 
     public void resetGame(){
         status = GameStatus.RESETING_GAME;
-        board.reset();
+        board.reset();  // se puede dejar ya que cambia todo el tablero.
         //indexes.addAll(Arrays.asList(0, 1, 2, 3));
     }
+
 }
 

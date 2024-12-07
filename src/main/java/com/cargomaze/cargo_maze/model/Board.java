@@ -100,10 +100,10 @@ public class Board {
 
         // boxes
 //       addBox(new Position(2, 2));
-        addBox(new Position(4, 4));
-        addBox(new Position(2, 5));
-        addBox(new Position(4, 6));
-        addBox(new Position(7, 3));
+        addBox(new Position(4, 4), 0);
+        addBox(new Position(2, 5), 1);
+        addBox(new Position(4, 6), 2);
+        addBox(new Position(7, 3), 3);
 
         // player start positions
         playerStartPositions.add(new Position(0, 0));
@@ -152,21 +152,30 @@ public class Board {
         return boxes.stream().allMatch(Box::isAtTarget);
     }
 
+    public void setCellAt(Position position, Cell cell) {
+        cells[position.getX()][position.getY()] = cell;
+    }
 
     private void addTarget(Position position) {
         cells[position.getX()][position.getY()] = new Cell(Cell.TARGET);
         targetPositions.add(position);
     }
 
-    public void addBox(Position position) {
+    public void addBox(Position position, int index) {
         cells[position.getX()][position.getY()] = new Cell(Cell.BOX);
-        boxes.add(new Box(UUID.randomUUID().toString(), position));
+        Box box = new Box(UUID.randomUUID().toString(), position);
+        box.setIndex(index);
+        boxes.add(box);
     }
 
     // getters :)
     public List<Position> getTargetPositions() { return new ArrayList<>(targetPositions); }
     public List<Box> getBoxes() { return new ArrayList<>(boxes); }
 
+    public void setBoxInList(Box box){
+        boxes.remove(box.getIndex());
+        boxes.add(box.getIndex(), box);
+    }
     // printing the board :o
     public void printBoard() {
         for (int y = 0; y < HEIGHT; y++) {
@@ -207,6 +216,8 @@ public class Board {
     public void setCellState(Position position, String state){
         cells[position.getX()][position.getY()].setState(state);
     }
+
+
 
     public String[][] getBoardState(){
         String[][] boardState = new String[HEIGHT][WIDTH];
@@ -255,6 +266,7 @@ public class Board {
             return false;
         }
         Board board = (Board) obj;
-        return board.id.equals(this.id);
+        return board.getId().equals(this.id);
     }
+
 }
