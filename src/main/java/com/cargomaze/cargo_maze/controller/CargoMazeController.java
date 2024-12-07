@@ -55,10 +55,8 @@ public class CargoMazeController {
     }
 
     @GetMapping("/correct")
-    @ResponseBody
-    public RedirectView getToken(
-            @RegisteredOAuth2AuthorizedClient("aad") OAuth2AuthorizedClient authorizedClient, HttpServletResponse response,
-            RedirectAttributes redirectAttributes) {
+    public ResponseEntity<?> getToken(
+            @RegisteredOAuth2AuthorizedClient("aad") OAuth2AuthorizedClient authorizedClient, HttpServletResponse response) {
         try {
             String token = authorizedClient.getAccessToken().getTokenValue();
             System.out.println(token);
@@ -82,27 +80,19 @@ public class CargoMazeController {
                 displayName = data[0];
             }
 
-//            Map<String, String> responseBody = new HashMap<>();
-//            responseBody.put("displayName", displayName);
-//            responseBody.put("userPrincipalName", userPrincipalName);
-//            responseBody.put("token", token);
-//
+            Map<String, String> responseBody = new HashMap<>();
+            responseBody.put("displayName", displayName);
+            responseBody.put("userPrincipalName", userPrincipalName);
+            responseBody.put("token", token);
+
 //            JSONObject json = new JSONObject(responseBody);
 //            HttpHeaders headers = new HttpHeaders();
 //            headers.setContentType(MediaType.APPLICATION_JSON);
+            response.sendRedirect("http://localhost:4200/sessionMenu.html?token=" + URLEncoder.encode(token, "UTF-8") + "&displayName=" + URLEncoder.encode(displayName, "UTF-8"));
 
-//            return new ResponseEntity<>(json.toString(), headers, HttpStatus.OK);
-
-            String redirectUrl = String.format("http://localhost:4200/sessionMenu.html?displayName=%s&userPrincipalName=%s&token=%s",
-                URLEncoder.encode(displayName, StandardCharsets.UTF_8),
-                URLEncoder.encode(userPrincipalName, StandardCharsets.UTF_8),
-                URLEncoder.encode(token, StandardCharsets.UTF_8)
-                );
-            return new RedirectView(redirectUrl);
+            return ResponseEntity.ok().body(responseBody);
         } catch (Exception e) {
-            logger.error("Error en el flujo de autenticación", e);
-            String errorRedirectUrl = "http://localhost:4200/error.html";
-            return new RedirectView(errorRedirectUrl);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
         }
     }
 
