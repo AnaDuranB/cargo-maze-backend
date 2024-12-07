@@ -12,27 +12,25 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableWebSecurity
 public class SecurityConfig {
 
-//    @Bean
-//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//        http
-//            .csrf().disable()
-//            .cors()
-//            .and()
-//            .authorizeRequests()
-//            .requestMatchers("/public/**").permitAll() // Rutas públicas
-//            .anyRequest().authenticated() // Todas las demás requieren autenticación
-//            .and()
-//            .oauth2Login()
-////            .successHandler((request, response, authentication) -> {
-////                // Redirigir al endpoint del controlador después del login exitoso
-////                response.sendRedirect("/cargoMaze/correct");
-////            })
-//            .failureHandler((request, response, exception) -> {
-//                // Manejar fallos de autenticación
-//                response.sendRedirect("http://localhost:4200?error=true");
-//            });
-//        return http.build();
-//    }
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf().disable()
+            .cors()
+            .and()
+            .authorizeRequests()
+            .requestMatchers("/public/**").permitAll()
+            .anyRequest().authenticated()
+            .and()
+            .oauth2Login()
+            .successHandler((request, response, authentication) -> {
+                response.sendRedirect("/cargoMaze/correct");
+            })
+            .failureHandler((request, response, exception) -> {
+                response.sendRedirect("http://localhost:4200?error=true");
+            });
+        return http.build();
+    }
 
     @Bean
     public WebMvcConfigurer corsConfigurer() {
@@ -40,7 +38,7 @@ public class SecurityConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:4200")
+                        .allowedOrigins("http://localhost:4200", "https://login.microsoftonline.com")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);

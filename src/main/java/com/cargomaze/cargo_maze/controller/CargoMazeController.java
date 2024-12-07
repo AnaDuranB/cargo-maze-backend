@@ -6,7 +6,6 @@ import com.cargomaze.cargo_maze.persistance.exceptions.*;
 import com.cargomaze.cargo_maze.services.AuthServices;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
@@ -20,22 +19,27 @@ import org.springframework.web.bind.annotation.*;
 
 import com.cargomaze.cargo_maze.services.CargoMazeServices;
 import com.cargomaze.cargo_maze.services.exceptions.CargoMazeServicesException;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.web.servlet.view.RedirectView;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONObject;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:4200")
+//@CrossOrigin(origins = "http://localhost:4200")
 @RequestMapping("/cargoMaze")
 public class CargoMazeController {
 
@@ -52,16 +56,12 @@ public class CargoMazeController {
 
     @GetMapping("/correct")
     @ResponseBody
-    public void getToken(
-            @RegisteredOAuth2AuthorizedClient("aad") OAuth2AuthorizedClient authorizedClient,
-            HttpServletResponse response,
-            RedirectAttributes redirectAttributes) throws IOException, InterruptedException {
+    public RedirectView getToken(
+            @RegisteredOAuth2AuthorizedClient("aad") OAuth2AuthorizedClient authorizedClient, HttpServletResponse response,
+            RedirectAttributes redirectAttributes) {
         try {
-            //acceso del token
-
             String token = authorizedClient.getAccessToken().getTokenValue();
-            System.out.println("Token obtenido: " + token);
-
+            System.out.println(token);
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create("https://graph.microsoft.com/v1.0/me"))
@@ -70,38 +70,43 @@ public class CargoMazeController {
                     .build();
 
             HttpResponse<String> responseGraph = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            // Parse the JSON response of Microsoft Graph
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode jsonNode = objectMapper.readTree(responseGraph.body());
-            System.out.println(jsonNode);
 
             String displayName = jsonNode.path("displayName").asText();
             String userPrincipalName = jsonNode.path("userPrincipalName").asText();
-            System.out.println("Display Name: " + displayName);
-            System.out.println("User Principal Name: " + userPrincipalName);
 
-            if(userPrincipalName.length() == 0){
+            if (userPrincipalName.isEmpty()) {
                 userPrincipalName = authServices.getEmailFromToken(token);
                 String[] data = userPrincipalName.split("@");
                 displayName = data[0];
             }
 
-            cargoMazeServices.createPlayer(displayName);
+//            Map<String, String> responseBody = new HashMap<>();
+//            responseBody.put("displayName", displayName);
+//            responseBody.put("userPrincipalName", userPrincipalName);
+//            responseBody.put("token", token);
+//
+//            JSONObject json = new JSONObject(responseBody);
+//            HttpHeaders headers = new HttpHeaders();
+//            headers.setContentType(MediaType.APPLICATION_JSON);
 
-            String redirectUrl = String.format(
-                    "http://localhost:4200/sessionMenu.html?displayName=%s&userPrincipalName=%s&token=%s",
-                    URLEncoder.encode(displayName, StandardCharsets.UTF_8),
-                    URLEncoder.encode(userPrincipalName, StandardCharsets.UTF_8),
-                    URLEncoder.encode(token, StandardCharsets.UTF_8)
-            );
-            System.out.println("Redirigiendo a: " + redirectUrl);
+//            return new ResponseEntity<>(json.toString(), headers, HttpStatus.OK);
 
-            response.sendRedirect(redirectUrl);
-        } catch (CargoMazePersistanceException | CargoMazeServicesException e) {
-            throw new RuntimeException(e);
+            String redirectUrl = String.format("http://localhost:4200/sessionMenu.html?displayName=%s&userPrincipalName=%s&token=%s",
+                URLEncoder.encode(displayName, StandardCharsets.UTF_8),
+                URLEncoder.encode(userPrincipalName, StandardCharsets.UTF_8),
+                URLEncoder.encode(token, StandardCharsets.UTF_8)
+                );
+            return new RedirectView(redirectUrl);
+        } catch (Exception e) {
+            logger.error("Error en el flujo de autenticación", e);
+            String errorRedirectUrl = "http://localhost:4200/error.html";
+            return new RedirectView(errorRedirectUrl);
         }
     }
+
+
 
 
     //Session controller
