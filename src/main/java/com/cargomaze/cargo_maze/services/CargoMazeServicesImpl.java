@@ -196,13 +196,13 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
         Position boxNewPosition = null;
         int boxIndex = -1; 
         if (isValidPlayerMove(currentPos, newPosition, board)) {
-            boolean hasBoxAt = board.hasBoxAt(newPosition);
+            boolean hasBoxAt = board.hasBoxAt(newPosition); // 
             if (hasBoxAt) {
                 boxNewPosition = getPositionFromMovingABox(newPosition, currentPos);
                 boxIndex = board.getBoxAt(newPosition).getIndex();
                 boolean moveBox = moveBox(player, currentPos, newPosition, boxNewPosition,board, gameSessionId, boxIndex);
                 if (!moveBox) {
-                    System.out.println("Error moving box");
+                    //System.out.println("Error moving box");
                     persistance.updatePlayerLocked(playerId, false);
                     return false;
                 }
@@ -217,19 +217,19 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
     private boolean movePlayer(Player player, Position newPosition, Position currentPos, String sessionId) throws CargoMazePersistanceException {
         try {  
             Cell cell1 = getCellAt(sessionId, currentPos.getX(), currentPos.getY());
-            cell1.setState(Cell.EMPTY);
+            cell1.setState(Cell.EMPTY); // AL MOMENTO DE OBTENER LA CELDA SOLO SE OBTIENE SI NO HAY UN JUGADOR O CAJA, IMPLEMENTAR
             Cell cell2 = getCellAt(sessionId, newPosition.getX(), newPosition.getY());
             cell2.setState(Cell.PLAYER);
 
             persistance.updateCellStateAt(sessionId, currentPos, cell1.getState()); 
-            System.out.println("Cell playerwasthere state: " + cell1.getState());
+            //System.out.println("Cell playerwasthere state: " + cell1.getState());
             persistance.updateCellStateAt(sessionId, newPosition, cell2.getState());
-            System.out.println("Cell2 player is there state: " + cell2.getState());
+            //System.out.println("Cell2 player is there state: " + cell2.getState());
             persistance.updatePlayerPosition(player.getNickname(), newPosition); 
-            System.out.println("Player moved to: " + newPosition.toString() + " unblocking player");
-
+            //System.out.println("Player moved to: " + newPosition.toString() + " unblocking player");
 
         } catch (Exception e) { 
+            persistance.unBlockCellAt(sessionId, currentPos.getX(), currentPos.getY()); // CON ESTO EL PROBLEMA DEBERÍA QUITARSE
             persistance.updatePlayerLocked(player.getNickname(), false);
             return false;
         }
@@ -243,7 +243,7 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
         if (isValidBoxMove(player, box, boxNewPosition, board)) { // va mover la caja
             try {
                 box.move(boxNewPosition); // se cambia el lugar donde esta la caja
-                System.out.println("Box moved" + box.getPosition().toString());	
+                //System.out.println("Box moved" + box.getPosition().toString());	
                 if (board.isTargetAt(boxNewPosition)) {
                     box.setAtTarget(true);
                     boolean allOtherBoxesAtTarget = board.getBoxes().stream()
@@ -256,23 +256,26 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
                 else if (board.isTargetAt(boxPosition)) {
                     box.setAtTarget(false);
                 }
-                Cell cell1 = getCellAt(gameSessionId, boxNewPosition.getX(), boxNewPosition.getY());
-                cell1.setState(Cell.BOX);
-                
+
                 Cell cell2 = getCellAt(gameSessionId, boxPosition.getX(), boxPosition.getY());
                 cell2.setState(Cell.EMPTY);
 
+                Cell cell1 = getCellAt(gameSessionId, boxNewPosition.getX(), boxNewPosition.getY()); // SOLO SE PUEDE OBTENER
+                cell1.setState(Cell.BOX);                                        // SI NO HAY UN JUGADOR O CAJA O WALL 
+                 
                 box.setLocked(false);
 
-                System.out.println("Cell box state: " + cell1.getState());
-                System.out.println("Cell boxwasthere state: " + cell2.getState());
+                //System.out.println("Cell box state: " + cell1.getState());
+                //System.out.println("Cell boxwasthere state: " + cell2.getState());
 
                 persistance.updateBoxAtIndex(gameSessionId, boxIndex, box);
                 persistance.updateCellStateAt(gameSessionId, boxNewPosition, cell1.getState());
                 persistance.updateCellStateAt(gameSessionId, boxPosition, cell2.getState());
             } 
             catch (Exception e) {
-                System.out.println("Error moving box" + e.getMessage());
+                persistance.unblockBoxAtIndex(gameSessionId,boxIndex);
+                persistance.unBlockCellAt(gameSessionId, boxPosition.getX(), boxPosition.getY()); // desbloqueamos la celda en caso que al momento de mover la caja algun thread haya bloqueado su nueva posicion :)
+                //System.out.println("Error moving box" + e.getMessage());
                 return false;
             }
             return true;
@@ -283,8 +286,8 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
 
     private boolean isValidPlayerMove(Position currentPosition, Position newPosition, Board board) {
         return currentPosition.isAdjacent(newPosition) && board.isValidPosition(newPosition)
-                && !board.hasWallAt(newPosition) && !board.isPlayerAt(newPosition);
-    }
+                && !board.hasWallAt(newPosition) && !board.isPlayerAt(newPosition); // aquí se presenta el problema de condicion de carrera
+    }               // preguntar a la session si hay un jugador en esa posicion, 
 
     private Position getPositionFromMovingABox(Position boxPosition, Position playerPosition) {
         // Eje y del jugador es menor al de la caja
@@ -307,6 +310,6 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
                 board.isValidPosition(newPosition) &&
                 !board.hasWallAt(newPosition) &&
                 !board.hasBoxAt(newPosition) &&
-                !board.isPlayerAt(newPosition);
+                !board.isPlayerAt(newPosition); // aquí se presenta el problema de condicion de carrera
     }
 }
