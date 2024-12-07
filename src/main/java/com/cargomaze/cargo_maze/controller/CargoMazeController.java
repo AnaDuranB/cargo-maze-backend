@@ -80,7 +80,7 @@ public class CargoMazeController {
 //            JSONObject json = new JSONObject(responseBody);
 //            HttpHeaders headers = new HttpHeaders();
 //            headers.setContentType(MediaType.APPLICATION_JSON);
-            response.sendRedirect("http://localhost:4200/sessionMenu.html?token=" + URLEncoder.encode(token, "UTF-8") + "&displayName=" + URLEncoder.encode(displayName, "UTF-8"));
+            response.sendRedirect("https://calm-rock-0d4eb650f.5.azurestaticapps.net/sessionMenu.html?token=" + URLEncoder.encode(token, "UTF-8") + "&displayName=" + URLEncoder.encode(displayName, "UTF-8"));
 
             return ResponseEntity.ok().body(responseBody);
         } catch (Exception e) {
@@ -184,7 +184,7 @@ public class CargoMazeController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
         }
     }
-    
+
     @GetMapping(value = "cargoMaze/sessions/{id}/players", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getPlayersInSession(@PathVariable String id) {
         try {

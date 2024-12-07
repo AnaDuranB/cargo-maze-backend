@@ -30,7 +30,7 @@ public class SecurityConfig {
                     response.sendRedirect("/cargoMaze/correct");
                 })
                 .failureHandler((request, response, exception) -> {
-                    response.sendRedirect("http://localhost:4200/?error=true");
+                    response.sendRedirect("https://calm-rock-0d4eb650f.5.azurestaticapps.net/?error=true");
                 });
         return http.build();
     }
@@ -41,7 +41,7 @@ public class SecurityConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:4200")
+                        .allowedOrigins("https://calm-rock-0d4eb650f.5.azurestaticapps.net")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);
