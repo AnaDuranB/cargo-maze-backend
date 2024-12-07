@@ -1,25 +1,21 @@
 package com.cargomaze.cargo_maze.services;
 
+import com.cargomaze.cargo_maze.model.*;
 import com.cargomaze.cargo_maze.persistance.exceptions.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.cargomaze.cargo_maze.model.Board;
-import com.cargomaze.cargo_maze.model.Box;
-import com.cargomaze.cargo_maze.model.Cell;
-import com.cargomaze.cargo_maze.model.GameSession;
-import com.cargomaze.cargo_maze.model.GameStatus;
-import com.cargomaze.cargo_maze.model.Player;
-import com.cargomaze.cargo_maze.model.Position;
 import com.cargomaze.cargo_maze.repository.CargoMazeDAL;
 import com.cargomaze.cargo_maze.services.exceptions.CargoMazeServicesException;
 
 import java.util.LinkedList;
 import java.util.List;
 
+
 @Service
 public class CargoMazeServicesImpl implements CargoMazeServices {
 
     private final CargoMazeDAL persistance;
+
 
     @Autowired
     public CargoMazeServicesImpl(CargoMazeDAL persistance) {
@@ -31,6 +27,7 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
         if (nickname == null || nickname.isEmpty()) {
             throw new CargoMazeServicesException(CargoMazeServicesException.INVALID_NICKNAME);
         }
+
         Player player = new Player(nickname);
         return persistance.addPlayer(player);
     }
@@ -322,4 +319,5 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
                 !board.hasBoxAt(newPosition) &&
                 !board.isPlayerAt(newPosition); // aquí se presenta el problema de condicion de carrera
     }
+
 }

@@ -53,6 +53,11 @@
 		</dependency>
 		
 		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
@@ -60,7 +65,30 @@
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-oauth2-client</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-oauth2-authorization-server</artifactId>
+			<version>1.4.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.azure.spring</groupId>
+			<artifactId>spring-cloud-azure-starter-active-directory</artifactId>
+			<version>4.2.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.nimbusds</groupId>
+			<artifactId>nimbus-jose-jwt</artifactId>
+			<version>9.47</version>
 		</dependency>
 
 		<!-- Front-end Dependencies -->
@@ -95,6 +123,11 @@
 			<version>3.7.1</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20240303</version> <!-- Asegúrate de usar la versión más reciente -->
+		</dependency>
 		<!-- MongoDB-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -125,4 +158,5 @@
 			</plugin>
 		</plugins>
 	</build>
+
 </project>

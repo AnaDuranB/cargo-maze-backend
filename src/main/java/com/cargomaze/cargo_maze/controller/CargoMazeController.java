@@ -3,28 +3,89 @@ package com.cargomaze.cargo_maze.controller;
 import com.cargomaze.cargo_maze.model.Player;
 import com.cargomaze.cargo_maze.model.Position;
 import com.cargomaze.cargo_maze.persistance.exceptions.*;
+import com.cargomaze.cargo_maze.services.AuthServices;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
 import org.springframework.web.bind.annotation.*;
 
 import com.cargomaze.cargo_maze.services.CargoMazeServices;
 import com.cargomaze.cargo_maze.services.exceptions.CargoMazeServicesException;
 
+import java.net.URI;
+import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 @RestController
+//@CrossOrigin(origins = "http://localhost:4200")
 @RequestMapping("/")
 public class CargoMazeController {
 
     private final CargoMazeServices cargoMazeServices;
-    
+    private final AuthServices authServices;
+
+    private static final Logger logger = LoggerFactory.getLogger(CargoMazeController.class);
+
     @Autowired
-    public CargoMazeController(CargoMazeServices cargoMazeServices){
+    public CargoMazeController(CargoMazeServices cargoMazeServices, AuthServices authServices){
         this.cargoMazeServices = cargoMazeServices;
+        this.authServices = authServices;
+    }
+
+    @GetMapping("cargoMaze/correct")
+    public ResponseEntity<?> getToken(
+            @RegisteredOAuth2AuthorizedClient("aad") OAuth2AuthorizedClient authorizedClient, HttpServletResponse response) {
+        try {
+            String token = authorizedClient.getAccessToken().getTokenValue();
+            System.out.println(token);
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://graph.microsoft.com/v1.0/me"))
+                    .header("Authorization", "Bearer " + token)
+                    .GET()
+                    .build();
+
+            HttpResponse<String> responseGraph = client.send(request, HttpResponse.BodyHandlers.ofString());
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode jsonNode = objectMapper.readTree(responseGraph.body());
+
+            String displayName = jsonNode.path("displayName").asText();
+            String userPrincipalName = jsonNode.path("userPrincipalName").asText();
+
+            if (userPrincipalName.isEmpty()) {
+                userPrincipalName = authServices.getEmailFromToken(token);
+                String[] data = userPrincipalName.split("@");
+                displayName = data[0];
+            }
+
+            Map<String, String> responseBody = new HashMap<>();
+            responseBody.put("displayName", displayName);
+            responseBody.put("userPrincipalName", userPrincipalName);
+            responseBody.put("token", token);
+
+//            JSONObject json = new JSONObject(responseBody);
+//            HttpHeaders headers = new HttpHeaders();
+//            headers.setContentType(MediaType.APPLICATION_JSON);
+            response.sendRedirect("http://localhost:4200/sessionMenu.html?token=" + URLEncoder.encode(token, "UTF-8") + "&displayName=" + URLEncoder.encode(displayName, "UTF-8"));
+
+            return ResponseEntity.ok().body(responseBody);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+        }
     }
 
     @GetMapping()
@@ -36,28 +97,28 @@ public class CargoMazeController {
 
     /**
      * Reurns the base lobby
-     * @return 
+     * @return
      */
-    @GetMapping("cargoMaze/sessions/{id}")
+    @GetMapping(value  = "cargoMaze/sessions/{id}",  produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getGameSession(@PathVariable String id) {
         try {
             return new ResponseEntity<>(cargoMazeServices.getGameSession(id),HttpStatus.OK);
         } catch (CargoMazePersistanceException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
-        }        
+        }
     }
 
 
-    @GetMapping("cargoMaze/sessions/{id}/board/state")
+    @GetMapping(value  = "cargoMaze/sessions/{id}/board/state", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getBoardState(@PathVariable String id) {
         try {
             return new ResponseEntity<>(cargoMazeServices.getBoardState(id),HttpStatus.ACCEPTED);
         } catch ( CargoMazePersistanceException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
-        }        
+        }
     }
 
-    @GetMapping("cargoMaze/sessions/{id}/state")
+    @GetMapping(value = "cargoMaze/sessions/{id}/state", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getGameSessionState(@PathVariable String id){
         try{
             return new ResponseEntity<>(cargoMazeServices.getGameSession(id).getStatus(), HttpStatus.OK);
@@ -68,23 +129,22 @@ public class CargoMazeController {
 
     //Player controller
     
-    @GetMapping("cargoMaze/players/{nickName}")
-
+    @GetMapping(value = "cargoMaze/players/{nickName}",  produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getPlayer(@PathVariable String nickName) {
         try {
             return new ResponseEntity<>(cargoMazeServices.getPlayerById(nickName),HttpStatus.ACCEPTED);
         } catch (CargoMazePersistanceException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
-        }        
+        }
     }
 
-    @GetMapping("cargoMaze/players")
+    @GetMapping(value = "cargoMaze/players", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getPlayers() {
         try {
             return new ResponseEntity<>(cargoMazeServices.getPlayers(),HttpStatus.ACCEPTED);
         } catch (CargoMazePersistanceException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
-        }        
+        }
     }
 
     /**
@@ -101,7 +161,7 @@ public class CargoMazeController {
     }
 
 
-    @GetMapping("cargoMaze/sessions/{id}/players/count")
+    @GetMapping(value = "cargoMaze/sessions/{id}/players/count",  produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getPlayerCount(@PathVariable String id) {
         try {
             int playerCount = cargoMazeServices.getPlayerCount(id);
@@ -124,7 +184,8 @@ public class CargoMazeController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
         }
     }
-    @GetMapping("cargoMaze/sessions/{id}/players")
+    
+    @GetMapping(value = "cargoMaze/sessions/{id}/players", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getPlayersInSession(@PathVariable String id) {
         try {
             List<Player> players = cargoMazeServices.getPlayersInSession(id);
@@ -210,7 +271,7 @@ public class CargoMazeController {
         }
     }*/
 
-    @GetMapping("cargoMaze/sessions/{id}/boxes/{x}/{y}")
+    @GetMapping(value = "cargoMaze/sessions/{id}/boxes/{x}/{y}",  produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getBoxAt(@PathVariable String id, @PathVariable int x, @PathVariable int y) {
         try {
             return new ResponseEntity<>(cargoMazeServices.getBoxAt(id, x, y), HttpStatus.ACCEPTED);
@@ -219,7 +280,7 @@ public class CargoMazeController {
         }
     }
 
-    @GetMapping("cargoMaze/sessions/{id}/cells/{x}/{y}")
+    @GetMapping(value = "cargoMaze/sessions/{id}/cells/{x}/{y}",  produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getCellAt(@PathVariable String id, @PathVariable int x, @PathVariable int y) {
         try {
             return new ResponseEntity<>(cargoMazeServices.getCellAt(id, x, y), HttpStatus.ACCEPTED);
@@ -228,7 +289,7 @@ public class CargoMazeController {
         }
     }
 
-    @GetMapping("cargoMaze/sessions/{id}/boxes/index/{index}")
+    @GetMapping(value = "cargoMaze/sessions/{id}/boxes/index/{index}",  produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getBoxAtIndex(@PathVariable String id, @PathVariable int index) {
         try {
             return new ResponseEntity<>(cargoMazeServices.getBoxAtIndex(id, index), HttpStatus.ACCEPTED);

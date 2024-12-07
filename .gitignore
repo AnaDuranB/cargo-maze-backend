@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+## front
+src/main/resources/static

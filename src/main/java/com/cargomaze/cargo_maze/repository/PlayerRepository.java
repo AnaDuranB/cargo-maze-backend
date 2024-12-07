@@ -7,9 +7,10 @@ import org.springframework.stereotype.Repository;
 
 import com.cargomaze.cargo_maze.model.Player;
 
+import java.util.Optional;
+
 
 @Repository
 public interface PlayerRepository extends MongoRepository<Player, String> {
-
-
+//    Optional<Player> findByNickname(String nickname);
 }

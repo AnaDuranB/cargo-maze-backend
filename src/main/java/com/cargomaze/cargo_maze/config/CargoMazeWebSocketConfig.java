@@ -14,7 +14,10 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @Configuration
 @EnableWebSocketMessageBroker
 public class CargoMazeWebSocketConfig implements WebSocketMessageBrokerConfigurer  {
-    private static final String ALLOWED_ORIGIN = "https://calm-rock-0d4eb650f.5.azurestaticapps.net";
+    private static final String[] ALLOWED_ORIGINS = {
+            "http://localhost:4200",
+            "https://calm-rock-0d4eb650f.5.azurestaticapps.net"
+    };
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
@@ -24,20 +27,8 @@ public class CargoMazeWebSocketConfig implements WebSocketMessageBrokerConfigure
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/stompendpoint").setAllowedOrigins(ALLOWED_ORIGIN).withSockJS();    
-    }
-        @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**")
-                        .allowedOrigins(ALLOWED_ORIGIN)
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*")
-                        .allowCredentials(true)
-                        .maxAge(3600);
-            }
-        };
+        registry.addEndpoint("/stompendpoint")
+                .setAllowedOriginPatterns(ALLOWED_ORIGINS)
+                .withSockJS();
     }
 }
