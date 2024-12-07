@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
@@ -29,12 +30,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 @RestController
 //@CrossOrigin(origins = "http://localhost:4200")
-@RequestMapping("/cargoMaze")
+@RequestMapping("/")
 public class CargoMazeController {
 
     private final CargoMazeServices cargoMazeServices;
@@ -48,7 +46,7 @@ public class CargoMazeController {
         this.authServices = authServices;
     }
 
-    @GetMapping("/correct")
+    @GetMapping("cargoMaze/correct")
     public ResponseEntity<?> getToken(
             @RegisteredOAuth2AuthorizedClient("aad") OAuth2AuthorizedClient authorizedClient, HttpServletResponse response) {
         try {
@@ -90,9 +88,6 @@ public class CargoMazeController {
         }
     }
 
-
-
-
     @GetMapping()
     public ResponseEntity<?> getWelcomeMessage() {
         return new ResponseEntity<>(HttpStatus.OK);
@@ -104,7 +99,7 @@ public class CargoMazeController {
      * Reurns the base lobby
      * @return
      */
-    @GetMapping("cargoMaze/sessions/{id}")
+    @GetMapping(value  = "cargoMaze/sessions/{id}",  produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getGameSession(@PathVariable String id) {
         try {
             return new ResponseEntity<>(cargoMazeServices.getGameSession(id),HttpStatus.OK);
@@ -114,7 +109,7 @@ public class CargoMazeController {
     }
 
 
-    @GetMapping("cargoMaze/sessions/{id}/board/state")
+    @GetMapping(value  = "cargoMaze/sessions/{id}/board/state", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getBoardState(@PathVariable String id) {
         try {
             return new ResponseEntity<>(cargoMazeServices.getBoardState(id),HttpStatus.ACCEPTED);
@@ -123,7 +118,7 @@ public class CargoMazeController {
         }
     }
 
-    @GetMapping("cargoMaze/sessions/{id}/state")
+    @GetMapping(value = "cargoMaze/sessions/{id}/state", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getGameSessionState(@PathVariable String id){
         try{
             return new ResponseEntity<>(cargoMazeServices.getGameSession(id).getStatus(), HttpStatus.OK);
@@ -134,7 +129,7 @@ public class CargoMazeController {
 
     //Player controller
     
-    @GetMapping("cargoMaze/players/{nickName}")
+    @GetMapping(value = "cargoMaze/players/{nickName}",  produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getPlayer(@PathVariable String nickName) {
         try {
             return new ResponseEntity<>(cargoMazeServices.getPlayerById(nickName),HttpStatus.ACCEPTED);
@@ -143,7 +138,7 @@ public class CargoMazeController {
         }
     }
 
-    @GetMapping("cargoMaze/players")
+    @GetMapping(value = "cargoMaze/players", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getPlayers() {
         try {
             return new ResponseEntity<>(cargoMazeServices.getPlayers(),HttpStatus.ACCEPTED);
@@ -166,7 +161,7 @@ public class CargoMazeController {
     }
 
 
-    @GetMapping("cargoMaze/sessions/{id}/players/count")
+    @GetMapping(value = "cargoMaze/sessions/{id}/players/count",  produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getPlayerCount(@PathVariable String id) {
         try {
             int playerCount = cargoMazeServices.getPlayerCount(id);
@@ -189,7 +184,8 @@ public class CargoMazeController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
         }
     }
-    @GetMapping("cargoMaze/sessions/{id}/players")
+    
+    @GetMapping(value = "cargoMaze/sessions/{id}/players", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getPlayersInSession(@PathVariable String id) {
         try {
             List<Player> players = cargoMazeServices.getPlayersInSession(id);
@@ -275,7 +271,7 @@ public class CargoMazeController {
         }
     }*/
 
-    @GetMapping("cargoMaze/sessions/{id}/boxes/{x}/{y}")
+    @GetMapping(value = "cargoMaze/sessions/{id}/boxes/{x}/{y}",  produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getBoxAt(@PathVariable String id, @PathVariable int x, @PathVariable int y) {
         try {
             return new ResponseEntity<>(cargoMazeServices.getBoxAt(id, x, y), HttpStatus.ACCEPTED);
@@ -284,7 +280,7 @@ public class CargoMazeController {
         }
     }
 
-    @GetMapping("cargoMaze/sessions/{id}/cells/{x}/{y}")
+    @GetMapping(value = "cargoMaze/sessions/{id}/cells/{x}/{y}",  produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getCellAt(@PathVariable String id, @PathVariable int x, @PathVariable int y) {
         try {
             return new ResponseEntity<>(cargoMazeServices.getCellAt(id, x, y), HttpStatus.ACCEPTED);
@@ -293,7 +289,7 @@ public class CargoMazeController {
         }
     }
 
-    @GetMapping("cargoMaze/sessions/{id}/boxes/index/{index}")
+    @GetMapping(value = "cargoMaze/sessions/{id}/boxes/index/{index}",  produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getBoxAtIndex(@PathVariable String id, @PathVariable int index) {
         try {
             return new ResponseEntity<>(cargoMazeServices.getBoxAtIndex(id, index), HttpStatus.ACCEPTED);
