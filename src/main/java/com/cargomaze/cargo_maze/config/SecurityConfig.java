@@ -21,7 +21,7 @@ public class SecurityConfig {
             )
             .oauth2Login(oauth2 -> oauth2
                 .successHandler((request, response, authentication) -> response.sendRedirect("/cargoMaze/correct"))
-                .failureHandler((request, response, exception) -> response.sendRedirect("http://localhost:4200?error=true"))
+                .failureHandler((request, response, exception) -> response.sendRedirect("https://calm-rock-0d4eb650f.5.azurestaticapps.net?error=true"))
             );
     return http.build();
 }
