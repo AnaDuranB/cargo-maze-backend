@@ -10,7 +10,6 @@ import org.springframework.stereotype.Controller;
 import com.cargomaze.cargo_maze.model.Position;
 import com.cargomaze.cargo_maze.persistance.exceptions.CargoMazePersistanceException;
 import com.cargomaze.cargo_maze.services.CargoMazeServices;
-import com.cargomaze.cargo_maze.services.CargoMazeServicesImpl;
 import com.cargomaze.cargo_maze.services.exceptions.CargoMazeServicesException;
 
 
