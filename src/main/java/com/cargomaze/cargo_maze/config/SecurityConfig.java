@@ -5,10 +5,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-
 
 @Configuration
 @EnableWebSecurity
@@ -17,35 +13,17 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf().disable()
-                .cors()
-                .and()
-                .authorizeRequests()
-                .requestMatchers("/public/**").permitAll()
-                .anyRequest().authenticated()
-                .and()
-                .oauth2Login()
-                .successHandler((request, response, authentication) -> {
-                    // Deja que el flujo llegue al controlador
-                    response.sendRedirect("/cargoMaze/correct");
-                })
-                .failureHandler((request, response, exception) -> {
-                    response.sendRedirect("https://calm-rock-0d4eb650f.5.azurestaticapps.net/?error=true");
-                });
-        return http.build();
-    }
+            .csrf(csrf -> csrf.disable()) // Deshabilitar CSRF si no es necesario para tu caso
+            .cors(cors -> cors.disable()) // Deshabilitar CORS completamente
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/**").permitAll() // Rutas públicas permitidas
+                .anyRequest().authenticated() // Cualquier otra ruta necesita autenticación
+            )
+            .oauth2Login(oauth2 -> oauth2
+                .successHandler((request, response, authentication) -> response.sendRedirect("/cargoMaze/correct"))
+                .failureHandler((request, response, exception) -> response.sendRedirect("http://localhost:4200?error=true"))
+            );
+    return http.build();
+}
 
-    @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**")
-                        .allowedOrigins("https://calm-rock-0d4eb650f.5.azurestaticapps.net")
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*")
-                        .allowCredentials(true);
-            }
-        };
-    }
 }

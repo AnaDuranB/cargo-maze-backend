@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-//@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "http://localhost:4200")
 @RequestMapping("/")
 public class CargoMazeController {
 
@@ -80,7 +80,7 @@ public class CargoMazeController {
 //            JSONObject json = new JSONObject(responseBody);
 //            HttpHeaders headers = new HttpHeaders();
 //            headers.setContentType(MediaType.APPLICATION_JSON);
-            response.sendRedirect("https://calm-rock-0d4eb650f.5.azurestaticapps.net/sessionMenu.html?token=" + URLEncoder.encode(token, "UTF-8") + "&displayName=" + URLEncoder.encode(displayName, "UTF-8"));
+            response.sendRedirect("http://localhost:4200?token=" + URLEncoder.encode(token, "UTF-8") + "&displayName=" + URLEncoder.encode(displayName, "UTF-8"));
 
             return ResponseEntity.ok().body(responseBody);
         } catch (Exception e) {
