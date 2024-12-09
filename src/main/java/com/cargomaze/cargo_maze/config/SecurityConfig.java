@@ -16,7 +16,9 @@ public class SecurityConfig {
         "http://localhost:8080",
         "https://login.microsoftonline.com/ac3a534a-d5d6-42f6-aa4f-9dd5fbef911f/oauth2/v2.0/authorize",
         "https://login.microsoftonline.com",
-        "https://calm-rock-0d4eb650f.5.azurestaticapps.net"
+        "https://calm-rock-0d4eb650f.5.azurestaticapps.net",
+        "https://cargo-maze-backend-hwgpaheeb7hreqgv.eastus2-01.azurewebsites.net",
+        "https://cargo-maze-backend2-gbaadrdgb9eqf9e6.eastus2-01.azurewebsites.net"
     };
 
     @Bean
