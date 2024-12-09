@@ -17,7 +17,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable()) // Deshabilitar CSRF si no es necesario para tu caso
             .cors(cors -> cors.disable()) // Deshabilitar CORS completamente
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/**").permitAll() // Rutas públicas permitidas
+                .requestMatchers("/public/**").permitAll() // Rutas públicas permitidas
                 .anyRequest().authenticated() // Cualquier otra ruta necesita autenticación
             )
             .oauth2Login(oauth2 -> oauth2
