@@ -96,7 +96,7 @@ public class CargoMazeController {
             response.addCookie(displayNameCookie);
     
             // Redirigir al usuario a la página auth-complete.html
-            response.sendRedirect("http://localhost:4200/successLogin.html");
+            response.sendRedirect("https://calm-rock-0d4eb650f.5.azurestaticapps.net/successLogin.html");
     
             return ResponseEntity.ok().build(); // Puedes devolver una respuesta vacía si es necesario
     

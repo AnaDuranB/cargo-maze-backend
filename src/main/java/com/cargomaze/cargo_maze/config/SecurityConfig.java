@@ -45,7 +45,7 @@ public class SecurityConfig {
                 })
                 .failureHandler((request, response, exception) -> {
                     System.err.println("Error de autenticación: " + exception.getMessage());
-                    response.sendRedirect("http://localhost:4200?error=true");
+                    response.sendRedirect("https://calm-rock-0d4eb650f.5.azurestaticapps.net?error=true");
                 })
             );
         return http.build();
