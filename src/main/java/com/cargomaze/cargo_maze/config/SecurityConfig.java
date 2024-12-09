@@ -24,14 +24,16 @@ public class SecurityConfig {
         "http://localhost:4200",
         "http://localhost:8080",
         "https://proyectoarsw.duckdns.org",
-        "https://login.microsoftonline.com"
+        "https://login.microsoftonline.com",
+        "https://cargo-maze-backend2-gbaadrdgb9eqf9e6.eastus2-01.azurewebsites.net",
+        "https://cargo-maze-backend-hwgpaheeb7hreqgv.eastus2-01.azurewebsites.net"
     };
 
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .cors(Customizer.withDefaults()) 
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(AbstractHttpConfigurer::disable)  // Deshabilitar CSRF si no es necesario
             .authorizeHttpRequests(req  -> req
                     .requestMatchers(HttpMethod.OPTIONS).permitAll()

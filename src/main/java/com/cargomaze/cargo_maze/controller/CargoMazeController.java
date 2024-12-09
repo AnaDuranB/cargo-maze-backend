@@ -82,6 +82,7 @@ public class CargoMazeController {
             // Crear una cookie para guardar el token
             Cookie tokenCookie = new Cookie("auth_token", URLEncoder.encode(token, "UTF-8"));
             tokenCookie.setDomain("proyectoarsw.duckdns.org");
+            tokenCookie.setAttribute("SameSite", "None");
             tokenCookie.setHttpOnly(false);
             tokenCookie.setSecure(true);
             tokenCookie.setPath("/");
@@ -91,6 +92,7 @@ public class CargoMazeController {
             // Crear una cookie para el displayName
             Cookie displayNameCookie = new Cookie("display_name", URLEncoder.encode(displayName, "UTF-8"));
             displayNameCookie.setDomain("proyectoarsw.duckdns.org");
+            tokenCookie.setAttribute("SameSite", "None");
             displayNameCookie.setHttpOnly(false);
             displayNameCookie.setSecure(true); // Solo se enviará a través de HTTPS
             displayNameCookie.setPath("/");
