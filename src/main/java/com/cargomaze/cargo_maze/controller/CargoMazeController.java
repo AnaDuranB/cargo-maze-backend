@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@CrossOrigin("*")
+@CrossOrigin(origins = "https://calm-rock-0d4eb650f.5.azurestaticapps.net", allowCredentials = "true")
 @RequestMapping("/")
 public class CargoMazeController {
 
