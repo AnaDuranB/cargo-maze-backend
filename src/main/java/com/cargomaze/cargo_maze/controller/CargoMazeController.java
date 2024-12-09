@@ -28,12 +28,12 @@ import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.HashMap;
+
 import java.util.List;
 import java.util.Map;
 
 @RestController
-@CrossOrigin(origins = "https://calm-rock-0d4eb650f.5.azurestaticapps.net")
+@CrossOrigin("*")
 @RequestMapping("/")
 public class CargoMazeController {
 
@@ -48,7 +48,7 @@ public class CargoMazeController {
         this.authServices = authServices;
     }
 
-    @GetMapping("cargoMaze/correct")
+    @GetMapping("auth")
     public ResponseEntity<?> getToken(
             @RegisteredOAuth2AuthorizedClient("aad") OAuth2AuthorizedClient authorizedClient, 
             HttpServletResponse response) {
