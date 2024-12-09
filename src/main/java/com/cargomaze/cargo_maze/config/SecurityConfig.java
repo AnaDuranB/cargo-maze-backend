@@ -3,7 +3,6 @@ package com.cargomaze.cargo_maze.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
@@ -19,7 +18,6 @@ public class SecurityConfig {
         "https://calm-rock-0d4eb650f.5.azurestaticapps.net",
         "https://proyectoarsw.duckdns.org",
         "https://login.microsoftonline.com"
-
     };
 
 
@@ -34,7 +32,7 @@ public class SecurityConfig {
                 })
                 .failureHandler((request, response, exception) -> {
                     System.err.println("Error de autenticación: " + exception.getMessage());
-                    response.sendRedirect("http://localhost:4200?error=true");
+                    response.sendRedirect("https://calm-rock-0d4eb650f.5.azurestaticapps.net?error=true");
                 })
             );
         return http.build();
