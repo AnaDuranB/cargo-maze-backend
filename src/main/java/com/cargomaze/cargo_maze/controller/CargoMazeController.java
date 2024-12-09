@@ -81,7 +81,7 @@ public class CargoMazeController {
     
             // Crear una cookie para guardar el token
             Cookie tokenCookie = new Cookie("auth_token", URLEncoder.encode(token, "UTF-8"));
-            tokenCookie.setHttpOnly(false); 
+            tokenCookie.setHttpOnly(true); 
             tokenCookie.setSecure(true);  
             tokenCookie.setPath("/");    
             tokenCookie.setMaxAge(60 * 60); 
@@ -89,7 +89,7 @@ public class CargoMazeController {
     
             // Crear una cookie para el displayName
             Cookie displayNameCookie = new Cookie("display_name", URLEncoder.encode(displayName, "UTF-8"));
-            displayNameCookie.setHttpOnly(false); // Permitir acceso a este dato desde el frontend
+            displayNameCookie.setHttpOnly(true); // Permitir acceso a este dato desde el frontend
             displayNameCookie.setSecure(true);
             displayNameCookie.setPath("/");
             displayNameCookie.setMaxAge(60 * 60);
