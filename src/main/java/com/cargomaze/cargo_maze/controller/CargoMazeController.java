@@ -1,5 +1,6 @@
 package com.cargomaze.cargo_maze.controller;
 
+import com.cargomaze.cargo_maze.config.Encryption;
 import com.cargomaze.cargo_maze.model.Player;
 import com.cargomaze.cargo_maze.model.Position;
 import com.cargomaze.cargo_maze.persistance.exceptions.*;
@@ -29,6 +30,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -50,7 +52,7 @@ public class CargoMazeController {
 
     @GetMapping("auth")
     public ResponseEntity<?> getToken(
-            @RegisteredOAuth2AuthorizedClient("aad") OAuth2AuthorizedClient authorizedClient,
+            @RegisteredOAuth2AuthorizedClient("aad") OAuth2AuthorizedClient authorizedClient, 
             HttpServletResponse response) {
         try {
             // Obtener el token de acceso
@@ -97,7 +99,7 @@ public class CargoMazeController {
             response.addCookie(displayNameCookie);
 
             // Redirigir al usuario a la página auth-complete.html
-            response.sendRedirect("https://calm-rock-0d4eb650f.5.azurestaticapps.net/successLogin.html");
+            response.sendRedirect("http://localhost:4200/successLogin.html");
 
             return ResponseEntity.ok().build(); // Puedes devolver una respuesta vacía si es necesario
 
@@ -105,29 +107,44 @@ public class CargoMazeController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
         }
     }
+    @PostMapping(value = "cargoMaze/test-encryption", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, String>> testEncryption(@RequestBody String data) {
+        try {
+            System.out.println("Datos cifrados recibidos: " + data);  // Agregar log para revisar los datos
+            String encryptedData = Encryption.encrypt(data);
+            Map<String, String> response = new HashMap<>();
+            response.put("payload", encryptedData);  // Envía el cifrado como un campo dentro de un objeto JSON
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Error durante el cifrado: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
 
     @GetMapping()
     public ResponseEntity<?> getWelcomeMessage() {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    // Session controller
+    //Session controller
 
     /**
      * Reurns the base lobby
-     * 
      * @return
      */
-    @GetMapping(value = "cargoMaze/sessions/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value  = "cargoMaze/sessions/{id}",  produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getGameSession(@PathVariable String id) {
         try {
-            return new ResponseEntity<>(cargoMazeServices.getGameSession(id), HttpStatus.OK);
+            return new ResponseEntity<>(cargoMazeServices.getGameSession(id),HttpStatus.OK);
         } catch (CargoMazePersistanceException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
         }
     }
 
-    @GetMapping(value = "cargoMaze/sessions/{id}/board/state", produces = MediaType.APPLICATION_JSON_VALUE)
+
+    @GetMapping(value  = "cargoMaze/sessions/{id}/board/state", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getBoardState(@PathVariable String id) {
         try {
             return new ResponseEntity<>(cargoMazeServices.getBoardState(id), HttpStatus.ACCEPTED);

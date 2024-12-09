@@ -14,6 +14,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 
 @Configuration
@@ -31,11 +33,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .cors(Customizer.withDefaults()) 
+            .cors(Customizer.withDefaults())
             .csrf(AbstractHttpConfigurer::disable)  // Deshabilitar CSRF si no es necesario
             .authorizeHttpRequests(req  -> req
                     .requestMatchers(HttpMethod.OPTIONS).permitAll()
-                    .requestMatchers("/login/**", "/stompendpoint/**", "/auth/**").permitAll()
+                    .requestMatchers("/login/**", "/stompendpoint/**", "/auth/**", "/cargoMaze/test-encryption", "/error").permitAll()
                     .requestMatchers("/cargoMaze/**").authenticated()
             )
             .oauth2Login(oauth2 -> oauth2
@@ -45,7 +47,7 @@ public class SecurityConfig {
                 })
                 .failureHandler((request, response, exception) -> {
                     System.err.println("Error de autenticación: " + exception.getMessage());
-                    response.sendRedirect("https://calm-rock-0d4eb650f.5.azurestaticapps.net?error=true");
+                    response.sendRedirect("https://localhost:4200?error=true");
                 })
             );
         return http.build();
@@ -54,10 +56,17 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowCredentials(true);
-        configuration.setAllowedOrigins(Arrays.asList(ALLOWED_ORIGINS));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));  // Headers permitidos
+        configuration.setAllowCredentials(true); // Permitir cookies
+        configuration.setAllowedOriginPatterns(Arrays.asList(
+                "http://localhost:4200",
+                "http://localhost:8080",
+                "https://calm-rock-0d4eb650f.5.azurestaticapps.net",
+                "https://proyectoarsw.duckdns.org",
+                "https://login.microsoftonline.com"
+        ));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Métodos permitidos
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type", "*")); // Headers permitidos
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Disposition")); // Headers expuestos
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

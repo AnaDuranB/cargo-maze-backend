@@ -73,10 +73,19 @@
 			<artifactId>spring-security-oauth2-authorization-server</artifactId>
 			<version>1.4.0</version>
 		</dependency>
-
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-web</artifactId>
+			</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<version>5.0.0</version> <!-- Usa la versión más reciente disponible -->
+			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
