@@ -20,11 +20,12 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity
 public class SecurityConfig {
     private static final String[] ALLOWED_ORIGINS = {
-        "http://localhost:4200",
+        "http://localhost:4201",
         "http://localhost:8080",
         "https://calm-rock-0d4eb650f.5.azurestaticapps.net",
         "https://proyectoarsw.duckdns.org",
-        "https://login.microsoftonline.com"
+        "https://login.microsoftonline.com",
+        "http://localhost:4200"
     };
 
 
@@ -45,7 +46,7 @@ public class SecurityConfig {
                 })
                 .failureHandler((request, response, exception) -> {
                     System.err.println("Error de autenticación: " + exception.getMessage());
-                    response.sendRedirect("https://calm-rock-0d4eb650f.5.azurestaticapps.net?error=true");
+                    response.sendRedirect("http://localhost:4200?error=true");
                 })
             );
         return http.build();

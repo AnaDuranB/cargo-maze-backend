@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@CrossOrigin("*")
 @RequestMapping("/")
 public class CargoMazeController {
 
@@ -96,7 +95,7 @@ public class CargoMazeController {
             response.addCookie(displayNameCookie);
     
             // Redirigir al usuario a la página auth-complete.html
-            response.sendRedirect("https://calm-rock-0d4eb650f.5.azurestaticapps.net/successLogin.html");
+            response.sendRedirect("http://localhost:4200/successLogin.html");
     
             return ResponseEntity.ok().build(); // Puedes devolver una respuesta vacía si es necesario
     
