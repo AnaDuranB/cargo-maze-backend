@@ -6,6 +6,8 @@ import com.cargomaze.cargo_maze.persistance.exceptions.*;
 import com.cargomaze.cargo_maze.services.AuthServices;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
@@ -48,45 +50,62 @@ public class CargoMazeController {
 
     @GetMapping("cargoMaze/correct")
     public ResponseEntity<?> getToken(
-            @RegisteredOAuth2AuthorizedClient("aad") OAuth2AuthorizedClient authorizedClient, HttpServletResponse response) {
+            @RegisteredOAuth2AuthorizedClient("aad") OAuth2AuthorizedClient authorizedClient, 
+            HttpServletResponse response) {
         try {
+            // Obtener el token de acceso
             String token = authorizedClient.getAccessToken().getTokenValue();
             System.out.println(token);
+    
+            // Hacer una solicitud al Microsoft Graph API
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create("https://graph.microsoft.com/v1.0/me"))
                     .header("Authorization", "Bearer " + token)
                     .GET()
                     .build();
-
+    
             HttpResponse<String> responseGraph = client.send(request, HttpResponse.BodyHandlers.ofString());
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode jsonNode = objectMapper.readTree(responseGraph.body());
-
+    
+            // Procesar respuesta del Graph API
             String displayName = jsonNode.path("displayName").asText();
             String userPrincipalName = jsonNode.path("userPrincipalName").asText();
-
+    
             if (userPrincipalName.isEmpty()) {
                 userPrincipalName = authServices.getEmailFromToken(token);
                 String[] data = userPrincipalName.split("@");
                 displayName = data[0];
             }
-
-            Map<String, String> responseBody = new HashMap<>();
-            responseBody.put("displayName", displayName);
-            responseBody.put("userPrincipalName", userPrincipalName);
-            responseBody.put("token", token);
-
-//            JSONObject json = new JSONObject(responseBody);
-//            HttpHeaders headers = new HttpHeaders();
-//            headers.setContentType(MediaType.APPLICATION_JSON);
-            response.sendRedirect("https://calm-rock-0d4eb650f.5.azurestaticapps.net?token=" + URLEncoder.encode(token, "UTF-8") + "&displayName=" + URLEncoder.encode(displayName, "UTF-8"));
-
-            return ResponseEntity.ok().body(responseBody);
+    
+            // Crear una cookie para guardar el token
+            Cookie tokenCookie = new Cookie("auth_token", URLEncoder.encode(token, "UTF-8"));
+            tokenCookie.setHttpOnly(false); 
+            tokenCookie.setSecure(true);  
+            tokenCookie.setPath("/");    
+            tokenCookie.setMaxAge(60 * 60); 
+            response.addCookie(tokenCookie);
+    
+            // Crear una cookie para el displayName
+            Cookie displayNameCookie = new Cookie("display_name", URLEncoder.encode(displayName, "UTF-8"));
+            displayNameCookie.setHttpOnly(false); // Permitir acceso a este dato desde el frontend
+            displayNameCookie.setSecure(true);
+            displayNameCookie.setPath("/");
+            displayNameCookie.setMaxAge(60 * 60);
+            response.addCookie(displayNameCookie);
+    
+            // Redirigir al usuario a la página auth-complete.html
+            response.sendRedirect("http://localhost:4200/successLogin");
+    
+            return ResponseEntity.ok().build(); // Puedes devolver una respuesta vacía si es necesario
+    
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
         }
     }
+    
+
 
     @GetMapping()
     public ResponseEntity<?> getWelcomeMessage() {
