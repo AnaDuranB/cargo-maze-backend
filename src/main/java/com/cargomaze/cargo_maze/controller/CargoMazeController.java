@@ -100,7 +100,7 @@ public class CargoMazeController {
             response.addCookie(displayNameCookie);
 
             // Redirigir al usuario a la página auth-complete.html
-            response.sendRedirect("https://calm-rock-0d4eb650f.5.azurestaticapps.net?auth=true");
+            response.sendRedirect("https://calm-rock-0d4eb650f.5.azurestaticapps.net");
 
             return ResponseEntity.ok().build(); // Puedes devolver una respuesta vacía si es necesario
 
