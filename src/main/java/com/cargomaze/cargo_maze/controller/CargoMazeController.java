@@ -29,6 +29,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -78,6 +79,10 @@ public class CargoMazeController {
                 String[] data = userPrincipalName.split("@");
                 displayName = data[0];
             }
+            Map<String, String> responseBody = new HashMap<>();
+            responseBody.put("displayName", displayName);
+            responseBody.put("userPrincipalName", userPrincipalName);
+            responseBody.put("token", token);
 
             // Crear una cookie para guardar el token
             Cookie tokenCookie = new Cookie("auth_token", URLEncoder.encode(token, "UTF-8"));
@@ -99,10 +104,9 @@ public class CargoMazeController {
             displayNameCookie.setMaxAge(60 * 60); // 1 hora
             response.addCookie(displayNameCookie);
 
-            // Redirigir al usuario a la página auth-complete.html
-            response.sendRedirect("https://calm-rock-0d4eb650f.5.azurestaticapps.net");
+            response.sendRedirect("https://calm-rock-0d4eb650f.5.azurestaticapps.ne?&displayName="+ URLEncoder.encode(displayName, "UTF-8"));
 
-            return ResponseEntity.ok().build(); // Puedes devolver una respuesta vacía si es necesario
+            return ResponseEntity.ok().build();
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
