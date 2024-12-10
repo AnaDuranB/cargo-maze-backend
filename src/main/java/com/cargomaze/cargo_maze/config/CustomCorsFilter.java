@@ -1,6 +1,5 @@
 package com.cargomaze.cargo_maze.config;
 
-
 import java.io.IOException;
 import org.springframework.stereotype.Component;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,6 +29,5 @@ public class CustomCorsFilter implements Filter {
         }
 
         chain.doFilter(request, response);
-
     }
 }
