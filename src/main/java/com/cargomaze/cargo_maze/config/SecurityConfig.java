@@ -36,34 +36,17 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .cors(Customizer.withDefaults())
+            .cors(Customizer.withDefaults()) 
             .csrf(AbstractHttpConfigurer::disable)  // Deshabilitar CSRF si no es necesario
             .authorizeHttpRequests(req  -> req
                     .requestMatchers(HttpMethod.OPTIONS).permitAll()
-                    .requestMatchers("/login/**", "/stompendpoint/**", "/auth/**", "/cargoMaze/test-encryption", "/error").permitAll()
+                    .requestMatchers("/login/**", "/stompendpoint/**", "/auth/**").permitAll()
                     .requestMatchers("/cargoMaze/**").authenticated()
             )
             .oauth2Login(oauth2 -> oauth2
                 .successHandler((request, response, authentication) -> {
-                    // Extraer el correo electrónico del usuario autenticado
-                    String email = authentication.getName(); // Suponiendo que el nombre es el correo
-                    System.out.println("user" + email);
-                    // Configurar la cookie del JSESSIONID
-                    Cookie jsessionCookie = new Cookie("JSESSIONID", request.getSession().getId());
-                    jsessionCookie.setHttpOnly(true);
-                    jsessionCookie.setSecure(true);
-                    jsessionCookie.setPath("/");
-                    jsessionCookie.setMaxAge(3600); // Expiración en 1 hora
-                    response.addCookie(jsessionCookie);
-
-                    // Configurar una cookie para el nombre de usuario
-                    Cookie displayNameCookie = new Cookie("display_name", URLEncoder.encode( email, StandardCharsets.UTF_8));
-                    displayNameCookie.setSecure(true);
-                    displayNameCookie.setPath("/");
-                    displayNameCookie.setMaxAge(3600); // Expiración en 1 hora
-                    response.addCookie(displayNameCookie);
-                    
-                    response.sendRedirect("http://localhost:4200/successLogin.html");
+                    System.out.println("Autenticación exitosa, redirigiendo...");
+                    response.sendRedirect("/auth");
                 })
                 .failureHandler((request, response, exception) -> {
                     System.err.println("Error de autenticación: " + exception.getMessage());
