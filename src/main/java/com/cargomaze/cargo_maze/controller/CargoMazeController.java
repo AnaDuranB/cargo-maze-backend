@@ -110,10 +110,13 @@ public class CargoMazeController {
     @PostMapping(value = "cargoMaze/test-encryption", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, String>> testEncryption(@RequestBody String data) {
         try {
-            System.out.println("Datos cifrados recibidos: " + data);  // Agregar log para revisar los datos
+            System.out.println("Datos cifrados recibidos: " + data);
             String encryptedData = Encryption.encrypt(data);
+            System.out.println("encryptedData " + encryptedData);
+            String decryptedData = Encryption.decrypt(encryptedData);
+            System.out.println("decryptedData " + decryptedData);
             Map<String, String> response = new HashMap<>();
-            response.put("payload", encryptedData);  // Envía el cifrado como un campo dentro de un objeto JSON
+            response.put("payload", encryptedData);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Map<String, String> errorResponse = new HashMap<>();
