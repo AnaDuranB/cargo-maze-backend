@@ -62,7 +62,9 @@ public class SecurityConfig {
                 "http://localhost:8080/*",
                 "https://calm-rock-0d4eb650f.5.azurestaticapps.net/*",
                 "https://proyectoarsw.duckdns.org/*",
-                "https://login.microsoftonline.com/*"
+                "https://login.microsoftonline.com/*",
+                "http://localhost:4200",
+                "https://calm-rock-0d4eb650f.5.azurestaticapps.net"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Métodos permitidos
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type", "*")); // Headers permitidos

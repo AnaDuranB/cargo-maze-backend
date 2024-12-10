@@ -16,8 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 import com.cargomaze.cargo_maze.services.CargoMazeServices;
@@ -104,7 +106,7 @@ public class CargoMazeController {
             displayNameCookie.setMaxAge(60 * 60); // 1 hora
             response.addCookie(displayNameCookie);
 
-            response.sendRedirect("https://calm-rock-0d4eb650f.5.azurestaticapps.net/?displayName=" + URLEncoder.encode(displayName, "UTF-8"));
+            response.sendRedirect("http://localhost:4200/?displayName=" + URLEncoder.encode(displayName, "UTF-8"));
 
             return ResponseEntity.ok().build();
 
@@ -186,8 +188,15 @@ public class CargoMazeController {
     }
 
     @GetMapping(value = "cargoMaze/sessions/{id}/players/count", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getPlayerCount(@PathVariable String id) {
+    public ResponseEntity<?> getPlayerCount(@PathVariable String id, @AuthenticationPrincipal JwtAuthenticationToken token) {
         try {
+            if (token == null) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No autorizado");
+            }
+
+            String userPrincipalName = token.getName(); // El principal del token
+            System.out.println("Usuario autenticado: " + userPrincipalName);
+
             int playerCount = cargoMazeServices.getPlayerCount(id);
             return new ResponseEntity<>(playerCount, HttpStatus.OK);
         } catch (CargoMazePersistanceException ex) {
