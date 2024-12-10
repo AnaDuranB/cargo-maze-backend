@@ -58,11 +58,11 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true); // Permitir cookies
         configuration.setAllowedOriginPatterns(Arrays.asList(
-                "http://localhost:4200",
-                "http://localhost:8080",
-                "https://calm-rock-0d4eb650f.5.azurestaticapps.net",
-                "https://proyectoarsw.duckdns.org",
-                "https://login.microsoftonline.com"
+                "http://localhost:4200/*",
+                "http://localhost:8080/*",
+                "https://calm-rock-0d4eb650f.5.azurestaticapps.net/*",
+                "https://proyectoarsw.duckdns.org/*",
+                "https://login.microsoftonline.com/*"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Métodos permitidos
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type", "*")); // Headers permitidos
