@@ -106,7 +106,7 @@ public class CargoMazeController {
             displayNameCookie.setMaxAge(60 * 60); // 1 hora
             response.addCookie(displayNameCookie);
 
-            response.sendRedirect("http://localhost:4200/?displayName=" + URLEncoder.encode(displayName, "UTF-8"));
+            response.sendRedirect("https://calm-rock-0d4eb650f.5.azurestaticapps.net/?displayName=" + URLEncoder.encode(displayName, "UTF-8"));
 
             return ResponseEntity.ok().build();
 
