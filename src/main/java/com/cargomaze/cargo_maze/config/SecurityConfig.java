@@ -37,7 +37,7 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(req -> req
                 .requestMatchers(HttpMethod.OPTIONS).permitAll()
-                .requestMatchers("/stompendpoint/**", "/error").permitAll()
+                .requestMatchers("/stompendpoint/**", "/error", "/").permitAll()
                 .requestMatchers("/cargoMaze/**").authenticated() // Requiere autenticación
             )
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
