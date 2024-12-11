@@ -23,13 +23,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    private static final String[] ALLOWED_ORIGINS = {
-        "https://calm-rock-0d4eb650f.5.azurestaticapps.net",
-        "http://localhost:4200",
-        "http://localhost:8080",
-        "https://proyectoarsw.duckdns.org",
-        "https://login.microsoftonline.com"
-    };
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {

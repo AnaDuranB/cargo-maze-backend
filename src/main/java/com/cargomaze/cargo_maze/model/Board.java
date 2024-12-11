@@ -39,14 +39,6 @@ public class Board {
                 cells[x][y] = new Cell(Cell.EMPTY);
             }
         }
-        // for (int x = 0; x < WIDTH; x++) {
-        //     cells[x][0] = new Cell(Cell.WALL);
-        //     cells[x][HEIGHT-1] = new Cell(Cell.WALL);
-        // }
-        // for (int y = 0; y < HEIGHT; y++) {
-        //     cells[0][y] = new Cell(Cell.WALL);
-        //     cells[WIDTH-1][y] = new Cell(Cell.WALL);
-        // }
 
         // walls
 
@@ -100,7 +92,6 @@ public class Board {
         addTarget(new Position(8, 9));
 
         // boxes
-//       addBox(new Position(2, 2));
         addBox(new Position(4, 4), 0);
         addBox(new Position(2, 5), 1);
         addBox(new Position(4, 6), 2);
@@ -170,7 +161,6 @@ public class Board {
     }
 
     // getters :)
-    public List<Position> getTargetPositions() { return new ArrayList<>(targetPositions); }
     public List<Box> getBoxes() { return new ArrayList<>(boxes); }
 
     public void setBoxInList(Box box){
@@ -185,11 +175,6 @@ public class Board {
             }
             System.out.println();
         }
-    }
-
-
-    private boolean isPlayerStartPosition(Position position) {
-        return playerStartPositions.contains(position);
     }
 
 
@@ -249,11 +234,7 @@ public class Board {
     public Cell[][] getCells(){
         return cells;
     }
-    
-    public List<Position> getPlayerStartPositions(){
-        return playerStartPositions;
-    }
-    
+
     public String getId(){
         return id;
     }

@@ -38,16 +38,16 @@ import java.util.Map;
 @RestController
 @RequestMapping("/")
 public class CargoMazeController {
-
+    private static final String ERROR_KEY = "error";
+    private static final String NICKNAME_KEY = "nickname";
+    private static final String SESSION_ID_KEY = "sessionId";
+    private static final String MESSAGE_KEY = "message";
     private final CargoMazeServices cargoMazeServices;
-    private final AuthServices authServices;
 
-    private static final Logger logger = LoggerFactory.getLogger(CargoMazeController.class);
 
     @Autowired
-    public CargoMazeController(CargoMazeServices cargoMazeServices, AuthServices authServices) {
+    public CargoMazeController(CargoMazeServices cargoMazeServices) {
         this.cargoMazeServices = cargoMazeServices;
-        this.authServices = authServices;
     }
 
 
@@ -68,7 +68,7 @@ public class CargoMazeController {
         try {
             return new ResponseEntity<>(cargoMazeServices.getGameSession(id), HttpStatus.OK);
         } catch (CargoMazePersistanceException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(ERROR_KEY, ex.getMessage()));
         }
     }
 
@@ -77,7 +77,7 @@ public class CargoMazeController {
         try {
             return new ResponseEntity<>(cargoMazeServices.getBoardState(id), HttpStatus.ACCEPTED);
         } catch (CargoMazePersistanceException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(ERROR_KEY, ex.getMessage()));
         }
     }
 
@@ -86,7 +86,7 @@ public class CargoMazeController {
         try {
             return new ResponseEntity<>(cargoMazeServices.getGameSession(id).getStatus(), HttpStatus.OK);
         } catch (CargoMazePersistanceException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(ERROR_KEY, ex.getMessage()));
         }
     }
 
@@ -97,7 +97,7 @@ public class CargoMazeController {
         try {
             return new ResponseEntity<>(cargoMazeServices.getPlayerById(nickName), HttpStatus.ACCEPTED);
         } catch (CargoMazePersistanceException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(ERROR_KEY, ex.getMessage()));
         }
     }
 
@@ -106,7 +106,7 @@ public class CargoMazeController {
         try {
             return new ResponseEntity<>(cargoMazeServices.getPlayers(), HttpStatus.ACCEPTED);
         } catch (CargoMazePersistanceException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(ERROR_KEY, ex.getMessage()));
         }
     }
 
@@ -116,10 +116,10 @@ public class CargoMazeController {
     @PostMapping("cargoMaze/players")
     public ResponseEntity<?> createPlayer(@RequestBody Map<String, String> nickname, HttpSession session) {
         try {
-            cargoMazeServices.createPlayer(nickname.get("nickname"));
+            cargoMazeServices.createPlayer(nickname.get(NICKNAME_KEY));
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (CargoMazePersistanceException | CargoMazeServicesException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(ERROR_KEY, ex.getMessage()));
         }
     }
 
@@ -131,23 +131,23 @@ public class CargoMazeController {
             
             return new ResponseEntity<>(count, HttpStatus.OK);
         } catch (CargoMazePersistanceException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(ERROR_KEY, ex.getMessage()));
         }
     }
 
     @PutMapping("cargoMaze/sessions/{id}/players")
     public ResponseEntity<?> addPlayerToGame(@RequestBody Map<String, String> requestBody, @PathVariable String id) {
-        String nickname = requestBody.get("nickname");
+        String nickname = requestBody.get(NICKNAME_KEY);
         if (nickname == null || nickname.isBlank()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("error", "Nickname is required and cannot be empty"));
+                    .body(Map.of(ERROR_KEY, "Nickname is required and cannot be empty"));
         }
         try {
             cargoMazeServices.addNewPlayerToGame(nickname, id);
             return ResponseEntity.status(HttpStatus.ACCEPTED)
-                    .body(Map.of("message", "Player added to game session", "sessionId", id, "nickname", nickname));
+                    .body(Map.of(MESSAGE_KEY, "Player added to game session", SESSION_ID_KEY, id, NICKNAME_KEY, nickname));
         } catch (CargoMazePersistanceException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(ERROR_KEY, ex.getMessage()));
         }
     }
 
@@ -157,7 +157,7 @@ public class CargoMazeController {
             List<Player> players = cargoMazeServices.getPlayersInSession(id);
             return new ResponseEntity<>(players, HttpStatus.OK);
         } catch (CargoMazePersistanceException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(ERROR_KEY, ex.getMessage()));
         }
     }
 
@@ -165,16 +165,16 @@ public class CargoMazeController {
     public ResponseEntity<?> movePlayer(@RequestBody Position position, @PathVariable String sessionId,
             @PathVariable String nickname) {
         if (position == null) {
-            return ResponseEntity.badRequest().body(Map.of("error", "position is required"));
+            return ResponseEntity.badRequest().body(Map.of(ERROR_KEY, "position is required"));
         }
         try {
             if (!cargoMazeServices.move(nickname, sessionId, position)) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Invalid move"));
+                return ResponseEntity.badRequest().body(Map.of(ERROR_KEY, "Invalid move"));
             }
             return ResponseEntity.status(HttpStatus.ACCEPTED)
-                    .body(Map.of("message", "Player moved", "sessionId", sessionId, "nickname", nickname));
+                    .body(Map.of(MESSAGE_KEY, "Player moved", SESSION_ID_KEY, sessionId, NICKNAME_KEY, nickname));
         } catch (CargoMazePersistanceException | CargoMazeServicesException ex) {
-            return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of(ERROR_KEY, ex.getMessage()));
         }
     }
 
@@ -184,7 +184,7 @@ public class CargoMazeController {
             cargoMazeServices.removePlayerFromGame(nickname, id);
             return ResponseEntity.status(HttpStatus.ACCEPTED).build();
         } catch (CargoMazePersistanceException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(ERROR_KEY, ex.getMessage()));
         }
     }
 
@@ -193,9 +193,9 @@ public class CargoMazeController {
         try {
             cargoMazeServices.resetGameSession(id);
             return ResponseEntity.status(HttpStatus.ACCEPTED)
-                    .body(Map.of("message", "Game session reset", "sessionId", id));
+                    .body(Map.of(MESSAGE_KEY, "Game session reset", SESSION_ID_KEY, id));
         } catch (CargoMazePersistanceException | CargoMazeServicesException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(ERROR_KEY, ex.getMessage()));
         }
     }
 
@@ -205,7 +205,7 @@ public class CargoMazeController {
             cargoMazeServices.deletePlayer(id);
             return ResponseEntity.status(HttpStatus.ACCEPTED).build();
         } catch (CargoMazePersistanceException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(ERROR_KEY, ex.getMessage()));
         }
     }
 
@@ -215,7 +215,7 @@ public class CargoMazeController {
             cargoMazeServices.deletePlayers();
             return ResponseEntity.status(HttpStatus.ACCEPTED).build();
         } catch (CargoMazePersistanceException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(ERROR_KEY, ex.getMessage()));
         }
     }
 
@@ -225,30 +225,16 @@ public class CargoMazeController {
             cargoMazeServices.removePlayersFromSession(sessionId);
             return ResponseEntity.status(HttpStatus.ACCEPTED).build();
         } catch (CargoMazePersistanceException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(ERROR_KEY, ex.getMessage()));
         }
     }
-
-    /*
-     * @GetMapping("/sessions/{id}/boxes/{boxId}")
-     * public ResponseEntity<?> getBox(@PathVariable String id, @PathVariable String
-     * boxId) {
-     * try {
-     * return new ResponseEntity<>(cargoMazeServices.getBox(id, boxId),
-     * HttpStatus.ACCEPTED);
-     * } catch (CargoMazePersistanceException ex) {
-     * return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error",
-     * ex.getMessage()));
-     * }
-     * }
-     */
 
     @GetMapping(value = "cargoMaze/sessions/{id}/boxes/{x}/{y}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getBoxAt(@PathVariable String id, @PathVariable int x, @PathVariable int y) {
         try {
             return new ResponseEntity<>(cargoMazeServices.getBoxAt(id, x, y), HttpStatus.ACCEPTED);
         } catch (CargoMazePersistanceException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(ERROR_KEY, ex.getMessage()));
         }
     }
 
@@ -257,7 +243,7 @@ public class CargoMazeController {
         try {
             return new ResponseEntity<>(cargoMazeServices.getCellAt(id, x, y), HttpStatus.ACCEPTED);
         } catch (CargoMazePersistanceException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(ERROR_KEY, ex.getMessage()));
         }
     }
 
@@ -266,7 +252,7 @@ public class CargoMazeController {
         try {
             return new ResponseEntity<>(cargoMazeServices.getBoxAtIndex(id, index), HttpStatus.ACCEPTED);
         } catch (CargoMazePersistanceException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(ERROR_KEY, ex.getMessage()));
         }
     }
 }

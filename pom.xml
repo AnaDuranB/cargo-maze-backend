@@ -137,7 +137,7 @@
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
-			<version>20240303</version> <!-- Asegúrate de usar la versión más reciente -->
+			<version>20240303</version>
 		</dependency>
 		<!-- MongoDB-->
 		<dependency>
@@ -173,7 +173,6 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<useModulePath>false</useModulePath>
-<!--					<argLine>${argLine}</argLine>-->
 				</configuration>
 			</plugin>
 			<plugin>
