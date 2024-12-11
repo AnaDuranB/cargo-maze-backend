@@ -1,5 +1,6 @@
 package com.cargomaze.cargo_maze.model;
 
+import java.util.Objects;
 import java.util.UUID;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -70,5 +71,9 @@ public class Cell {
         }
         Cell cell = (Cell) obj;
         return cell.getId().equals(this.id);
+    }
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

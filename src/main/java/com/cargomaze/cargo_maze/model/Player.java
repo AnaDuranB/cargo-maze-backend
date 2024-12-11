@@ -4,6 +4,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.util.Objects;
+
 @Document
 public class Player{
     @Id
@@ -75,5 +77,10 @@ public class Player{
         }
         Player player = (Player) obj;
         return player.getNickname().equals(nickname);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(nickname);
     }
 }
