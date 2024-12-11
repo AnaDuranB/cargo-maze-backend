@@ -55,9 +55,15 @@ public class GameSession {
         }
     }
 
+//    public Player findPlayerByIndex(Player player) {
+//        if(players.isEmpty()){
+//            return null;
+//        }
+//        return players.get(player.getIndex());
+//    }
     public Player findPlayerByIndex(Player player) {
-        if(players.isEmpty()){
-            return null;
+        if (player.getIndex() < 0 || player.getIndex() >= players.size()) {
+            return null;  // Si el índice está fuera del rango de jugadores
         }
         return players.get(player.getIndex());
     }

@@ -2,6 +2,7 @@ package com.cargomaze.cargo_maze.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.springframework.data.annotation.Id;
@@ -258,15 +259,20 @@ public class Board {
     }
 
     @Override
-    public boolean equals(Object obj){
-        if(obj == this){
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        if(obj == null || obj.getClass() != this.getClass()){
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
         Board board = (Board) obj;
-        return board.getId().equals(this.id);
+        return id.equals(board.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
 }

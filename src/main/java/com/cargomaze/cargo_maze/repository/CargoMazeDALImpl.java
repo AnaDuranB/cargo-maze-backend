@@ -460,6 +460,4 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
         FindAndModifyOptions options = new FindAndModifyOptions().returnNew(true).upsert(false);
         return mongoTemplate.findAndModify(query, update, options, GameSession.class) != null;
     }
-
-
 }

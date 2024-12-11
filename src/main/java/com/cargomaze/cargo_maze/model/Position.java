@@ -19,6 +19,9 @@ public class Position {
         this.id = UUID.randomUUID().toString();
     }
 
+    public String getId() {
+        return id;
+    }
     // getters :)
     public int getX() {
         return x;

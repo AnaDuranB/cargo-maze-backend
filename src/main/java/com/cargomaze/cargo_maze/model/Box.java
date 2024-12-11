@@ -3,6 +3,8 @@ package com.cargomaze.cargo_maze.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.Objects;
+
 @Document
 public class Box {
     @Id
@@ -63,5 +65,9 @@ public class Box {
         }
         Box box = (Box) obj;
         return box.getId().equals(this.id);
+    }
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }
