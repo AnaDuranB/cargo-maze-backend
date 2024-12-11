@@ -4,11 +4,6 @@ import com.cargomaze.cargo_maze.model.Player;
 import com.cargomaze.cargo_maze.model.Position;
 import com.cargomaze.cargo_maze.persistance.exceptions.*;
 import com.cargomaze.cargo_maze.services.AuthServices;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,23 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
-import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 import com.cargomaze.cargo_maze.services.CargoMazeServices;
 import com.cargomaze.cargo_maze.services.exceptions.CargoMazeServicesException;
-
-import java.net.URI;
-import java.net.URLEncoder;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 
 import java.util.HashMap;
 import java.util.List;
@@ -54,77 +38,13 @@ public class CargoMazeController {
     }
 
     @GetMapping("/cargoMaze/resource")
-    public ResponseEntity<String> getResource(Authentication authentication) {
+    public ResponseEntity<?> getResource(Authentication authentication) {
         Jwt jwt = (Jwt) authentication.getPrincipal();
-        String username = jwt.getClaim("preferred_username"); // O el claim que desees usar
-        return ResponseEntity.ok("Acceso permitido a: " + username);
+        Map<String, String> claims = new HashMap<>();
+        claims.put("Hola", "SI");
+        return new ResponseEntity<>(claims, HttpStatus.ACCEPTED);
     }
 
-
-    @GetMapping("auth")
-    public ResponseEntity<?> getToken(
-            @RegisteredOAuth2AuthorizedClient("aad") OAuth2AuthorizedClient authorizedClient,
-            HttpServletResponse response) {
-        try {
-            // Obtener el token de acceso
-            String token = authorizedClient.getAccessToken().getTokenValue();
-            System.out.println(token);
-
-            // Hacer una solicitud al Microsoft Graph API
-            HttpClient client = HttpClient.newHttpClient();
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("https://graph.microsoft.com/v1.0/me"))
-                    .header("Authorization", "Bearer " + token)
-                    .GET()
-                    .build();
-
-            HttpResponse<String> responseGraph = client.send(request, HttpResponse.BodyHandlers.ofString());
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode jsonNode = objectMapper.readTree(responseGraph.body());
-
-            // Procesar respuesta del Graph API
-            String displayName = jsonNode.path("displayName").asText();
-            String userPrincipalName = jsonNode.path("userPrincipalName").asText();
-
-            if (userPrincipalName.isEmpty()) {
-                userPrincipalName = authServices.getEmailFromToken(token);
-                String[] data = userPrincipalName.split("@");
-                displayName = data[0];
-            }
-            Map<String, String> responseBody = new HashMap<>();
-            responseBody.put("displayName", displayName);
-            responseBody.put("userPrincipalName", userPrincipalName);
-            responseBody.put("token", token);
-
-            // Crear una cookie para guardar el token
-            Cookie tokenCookie = new Cookie("auth_token", URLEncoder.encode(token, "UTF-8"));
-            tokenCookie.setDomain("proyectoarsw.duckdns.org");
-            tokenCookie.setAttribute("SameSite", "None");
-            tokenCookie.setHttpOnly(false);
-            tokenCookie.setSecure(true);
-            tokenCookie.setPath("/");
-            tokenCookie.setMaxAge(60 * 60);
-            response.addCookie(tokenCookie);
-
-            // Crear una cookie para el displayName
-            Cookie displayNameCookie = new Cookie("display_name", URLEncoder.encode(displayName, "UTF-8"));
-            displayNameCookie.setDomain("proyectoarsw.duckdns.org");
-            tokenCookie.setAttribute("SameSite", "None");
-            displayNameCookie.setHttpOnly(false);
-            displayNameCookie.setSecure(true); // Solo se enviará a través de HTTPS
-            displayNameCookie.setPath("/");
-            displayNameCookie.setMaxAge(60 * 60); // 1 hora
-            response.addCookie(displayNameCookie);
-
-//            response.sendRedirect("https://calm-rock-0d4eb650f.5.azurestaticapps.net/?displayName=" + URLEncoder.encode(displayName, "UTF-8"));
-            response.sendRedirect("http://localhost:4200/?displayName=" + URLEncoder.encode(displayName, "UTF-8"));
-
-            return ResponseEntity.ok().build();
-
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
-        }
-    }
 
     @GetMapping()
     public ResponseEntity<?> getWelcomeMessage() {
@@ -156,7 +76,7 @@ public class CargoMazeController {
         }
     }
 
-    @GetMapping(value = "cargoMaze/sessions/{id}/state", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "cargoMaze/sessions/{id}/state", produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<?> getGameSessionState(@PathVariable String id) {
         try {
             return new ResponseEntity<>(cargoMazeServices.getGameSession(id).getStatus(), HttpStatus.OK);
@@ -198,18 +118,10 @@ public class CargoMazeController {
         }
     }
 
-    @GetMapping(value = "cargoMaze/sessions/{id}/players/count", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getPlayerCount(@PathVariable String id, @AuthenticationPrincipal JwtAuthenticationToken token) {
+    @GetMapping(value = "cargoMaze/sessions/{id}/players/count", produces = MediaType.TEXT_PLAIN_VALUE)
+    public ResponseEntity<?> getPlayerCount(@PathVariable String id) {
         try {
-            if (token == null) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No autorizado");
-            }
-
-            String userPrincipalName = token.getName(); // El principal del token
-            System.out.println("Usuario autenticado: " + userPrincipalName);
-
-            int playerCount = cargoMazeServices.getPlayerCount(id);
-            return new ResponseEntity<>(playerCount, HttpStatus.OK);
+            return new ResponseEntity<>(Integer.toString(cargoMazeServices.getPlayerCount(id)), HttpStatus.OK);
         } catch (CargoMazePersistanceException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
         }
