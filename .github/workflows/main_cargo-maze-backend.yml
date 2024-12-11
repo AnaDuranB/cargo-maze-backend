@@ -78,6 +78,5 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'cargo-maze-backend'
-          slot-name: 'Production'
           package: '*.jar'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_7F5151E0DB8B461EB7A8035F03BA6F99 }}

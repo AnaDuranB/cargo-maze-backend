@@ -22,7 +22,6 @@ jobs:
           java-version: '17'
           distribution: 'microsoft'
 
-
       - name: Build and Run with Maven
         env:
           MONGODB_NAME: ${{ secrets.MONGODB_NAME }}
@@ -79,6 +78,5 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'cargo-maze-backend2'
-          slot-name: 'Production'
           package: '*.jar'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_6C038BC0DAD349428163A667599488ED }}
