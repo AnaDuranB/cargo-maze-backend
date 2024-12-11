@@ -36,8 +36,8 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.projectKey=cargomaze
-            -Dsonar.organization=CargoMaze
+            -Dsonar.projectKey=AnaDuranB_cargo-maze-backend
+            -Dsonar.organization=cargomaze
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
 
