@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - uses: actions/checkout@v4
@@ -22,7 +22,7 @@ jobs:
           java-version: '17'
           distribution: 'microsoft'
 
-       - name: Build and Run with Maven
+      - name: Build and Run with Maven
         env:
           SECRET_KEY: ${{ secrets.SONAR_TOKEN }}
         run: |
@@ -57,7 +57,7 @@ jobs:
           path: '${{ github.workspace }}/target/*.jar'
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: build
     environment:
       name: 'Production'
