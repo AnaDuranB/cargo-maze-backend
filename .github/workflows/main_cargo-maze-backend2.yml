@@ -32,8 +32,9 @@ jobs:
       # SonarCloud Analysis
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
-          token: ${{ secrets.SONAR_TOKEN }}
           args: >
             -Dsonar.projectKey=cargomaze
             -Dsonar.organization=CargoMaze
@@ -70,6 +71,5 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'cargo-maze-backend2'
-          slot-name: 'Production'
           package: '*.jar'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_D8057D08551D40D7903D32BBE3776CD5 }}
