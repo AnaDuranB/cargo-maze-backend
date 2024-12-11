@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - uses: actions/checkout@v4
@@ -24,49 +24,51 @@ jobs:
 
       - name: Build and Run with Maven
         env:
-          SECRET-KEY: ${{ secrets.SECRET_KEY }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
         run: |
           mvn clean install
-          mvn jacoco:report
+          mvn verify jacoco:report
 
       # SonarCloud Analysis
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@v2
         with:
-          sonar-token: ${{ secrets.SONAR_TOKEN }}
-          sources: "src"
-          jacoco-report-path: "target/jacoco/jacoco.xml"
+          token: ${{ secrets.SONAR_TOKEN }}
+          args: >
+            -Dsonar.projectKey=cargomaze
+            -Dsonar.organization=CargoMaze
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
 
       - name: Upload JaCoCo Report as artifact
         uses: actions/upload-artifact@v4
         with:
           name: jacoco-report
-          path: target/jacoco/jacoco.xml
+          path: target/site/jacoco/jacoco.xml
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: java-app
-          path: '${{ github.workspace }}/target/*.jar'
+          path: target/*.jar
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: build
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-      
+
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: java-app
-      
+
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'cargo-maze-backend'
-          slot-name: 'Production'
           package: '*.jar'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_B38F76FB080D42028738B916223099D0 }}
