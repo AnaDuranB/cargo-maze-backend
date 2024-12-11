@@ -43,8 +43,7 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
         if (session == null) {
             throw new CargoMazePersistanceException(CargoMazePersistanceException.GAME_SESSION_NOT_FOUND);
         }
-        int playerCount = session.getPlayerCount();
-        return playerCount;
+        return session.getPlayerCount();
     }
 
     /* 

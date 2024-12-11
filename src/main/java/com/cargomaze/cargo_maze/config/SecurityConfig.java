@@ -17,10 +17,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-import jakarta.servlet.http.Cookie;
 
 
 
@@ -43,17 +39,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(req  -> req
                     .requestMatchers(HttpMethod.OPTIONS).permitAll()
                     .requestMatchers("/login/**", "/stompendpoint/**", "/auth/**", "/cargoMaze/test-encryption", "/error").permitAll()
-                    .requestMatchers("/cargoMaze/**").authenticated()
-            )
-            .oauth2Login(oauth2 -> oauth2
-                .successHandler((request, response, authentication) -> {
-                    System.out.println("Autenticación exitosa, redirigiendo...");
-                    response.sendRedirect("/auth");
-                })
-                .failureHandler((request, response, exception) -> {
-                    System.err.println("Error de autenticación: " + exception.getMessage());
-                    response.sendRedirect("http://localhost:4200?error=true");
-                })
+                    .requestMatchers("/cargoMaze/**").permitAll()
             );
         return http.build();
     }
