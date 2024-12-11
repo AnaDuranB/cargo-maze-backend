@@ -4,11 +4,6 @@ import com.cargomaze.cargo_maze.model.Player;
 import com.cargomaze.cargo_maze.model.Position;
 import com.cargomaze.cargo_maze.persistance.exceptions.*;
 import com.cargomaze.cargo_maze.services.AuthServices;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,20 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
-import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import com.cargomaze.cargo_maze.services.CargoMazeServices;
 import com.cargomaze.cargo_maze.services.exceptions.CargoMazeServicesException;
-
-import java.net.URI;
-import java.net.URLEncoder;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 
 import java.util.HashMap;
 import java.util.List;
@@ -48,6 +35,14 @@ public class CargoMazeController {
     @Autowired
     public CargoMazeController(CargoMazeServices cargoMazeServices) {
         this.cargoMazeServices = cargoMazeServices;
+    }
+
+    @GetMapping("/cargoMaze/resource")
+    public ResponseEntity<?> getResource(Authentication authentication) {
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        Map<String, String> claims = new HashMap<>();
+        claims.put("Hola", "SI");
+        return new ResponseEntity<>(claims, HttpStatus.ACCEPTED);
     }
 
 
@@ -81,7 +76,7 @@ public class CargoMazeController {
         }
     }
 
-    @GetMapping(value = "cargoMaze/sessions/{id}/state", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "cargoMaze/sessions/{id}/state", produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<?> getGameSessionState(@PathVariable String id) {
         try {
             return new ResponseEntity<>(cargoMazeServices.getGameSession(id).getStatus(), HttpStatus.OK);
@@ -123,13 +118,10 @@ public class CargoMazeController {
         }
     }
 
-    @GetMapping(value = "cargoMaze/sessions/{id}/players/count", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "cargoMaze/sessions/{id}/players/count", produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<?> getPlayerCount(@PathVariable String id) {
         try {
-            int playerCount = cargoMazeServices.getPlayerCount(id);
-            Map<String, Integer> count = Map.of("count", playerCount);
-            
-            return new ResponseEntity<>(count, HttpStatus.OK);
+            return new ResponseEntity<>(Integer.toString(cargoMazeServices.getPlayerCount(id)), HttpStatus.OK);
         } catch (CargoMazePersistanceException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(ERROR_KEY, ex.getMessage()));
         }
