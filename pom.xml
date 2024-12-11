@@ -31,7 +31,7 @@
 		<java.version>17</java.version>
 <!--		<sonar.login>3b45b224469e5b3cb9721d4aebd31b469c9c4145</sonar.login>-->
 		<sonar.coverage.jacoco.xmlReportPaths>
-			../app-it/target/site/jacoco-aggregate/jacoco.xml
+			../app-it/target/site/jacoco/jacoco.xml
 		</sonar.coverage.jacoco.xmlReportPaths>
 	</properties>
 	<dependencies>
