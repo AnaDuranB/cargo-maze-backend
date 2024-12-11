@@ -24,7 +24,7 @@ jobs:
 
       - name: Build and Run with Maven
         env:
-          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          SECRET_KEY: ${{ secrets.SONAR_TOKEN }}
         run: |
           mvn clean install
           mvn verify jacoco:report
@@ -42,7 +42,7 @@ jobs:
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
             -Dsonar.java.binaries=target/classes
-            -Dsonar.exclusions=**/config/**,**/exception/**,**/controller/*CargoMazeStompController.java
+            -Dsonar.exclusions=**src/test/**,**/*Test.java,**/config/**,**/exception/**,**/cargo_maze/**
 
       - name: Upload JaCoCo Report as artifact
         uses: actions/upload-artifact@v4
