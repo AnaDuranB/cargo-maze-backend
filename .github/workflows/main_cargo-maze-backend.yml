@@ -27,6 +27,8 @@ jobs:
           MONGODB_NAME: ${{ secrets.MONGODB_NAME }}
           MONGO_URI: ${{ secrets.MONGO_URI }}
           SECRET_KEY: ${{ secrets.SONAR_TOKEN }}
+          ISSUER_URI: ${{ secrets.ISSUER_URI }}
+          JWT_SET_URI: ${{ secrets.JWT_SET_URI }}
         run: |
           mvn clean install
           mvn verify jacoco:report
