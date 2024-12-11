@@ -30,17 +30,19 @@ jobs:
           mvn verify jacoco:report
 
       # SonarCloud Analysis
-      - name: SonarCloud Scan
+      - name: Run SonarCloud Analysis
         uses: sonarsource/sonarcloud-github-action@v2
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
+          entryPoint: "/opt/sonar-scanner/bin/sonar-scanner"
           args: >
             -Dsonar.projectKey=AnaDuranB_cargo-maze-backend
             -Dsonar.organization=cargomaze
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
-            -X
+            -Dsonar.java.binaries=target/classes
+            -Dsonar.exclusions=**/*.java,**/test/**,**/*Test.java,**/config/**,**/exception/**,**/controller/*CargoMazeStompController.java
 
       - name: Upload JaCoCo Report as artifact
         uses: actions/upload-artifact@v4
