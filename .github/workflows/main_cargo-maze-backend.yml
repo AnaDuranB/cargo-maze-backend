@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
@@ -22,57 +22,33 @@ jobs:
           java-version: '17'
           distribution: 'microsoft'
 
-      - name: Build and Run with Maven
-        env:
-          SECRET_KEY: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          mvn clean install
-          mvn verify jacoco:report
-
-      # SonarCloud Analysis
-      - name: Run SonarCloud Analysis
-        uses: sonarsource/sonarcloud-github-action@v2
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          entryPoint: "/opt/sonar-scanner/bin/sonar-scanner"
-          args: >
-            -Dsonar.projectKey=AnaDuranB_cargo-maze-backend
-            -Dsonar.organization=cargomaze
-            -Dsonar.host.url=https://sonarcloud.io
-            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
-            -Dsonar.java.binaries=target/classes
-            -Dsonar.exclusions=**/reports/**,**/test/**,**/*Test.java,**/exception/**,**/controller/*CargoMazeStompController.java,**/generated/**,**/resources/**
-
-      - name: Upload JaCoCo Report as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: jacoco-report
-          path: target/site/jacoco/jacoco.xml
+      - name: Build with Maven
+        run: mvn clean install
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: java-app
-          path: target/*.jar
+          path: '${{ github.workspace }}/target/*.jar'
 
   deploy:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     needs: build
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-
+      
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: java-app
-
+      
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'cargo-maze-backend'
+          slot-name: 'Production'
           package: '*.jar'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_B38F76FB080D42028738B916223099D0 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_7F5151E0DB8B461EB7A8035F03BA6F99 }}
