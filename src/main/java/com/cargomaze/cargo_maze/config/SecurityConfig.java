@@ -16,7 +16,9 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtDecoders;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -24,6 +26,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 
 
 
@@ -48,13 +51,33 @@ public class SecurityConfig {
                 .requestMatchers("/login/**", "/stompendpoint/**", "/auth/**", "/error").permitAll()
                 .requestMatchers("/cargoMaze/**").authenticated() // Requiere autenticación
             )
-            .oauth2ResourceServer(oauth2 -> oauth2
-                .jwt(Customizer.withDefaults())  // Configurar validación de JWT
-        );
-    
+            .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+            .exceptionHandling(exception -> exception
+                .authenticationEntryPoint(authenticationEntryPoint()) // Manejar errores de autenticación
+                .accessDeniedHandler(accessDeniedHandler())          // Manejar accesos denegados
+            );
+
         return http.build();
     }
 
+
+    // Personaliza el manejo de errores de autenticación
+    @Bean
+    public AuthenticationEntryPoint authenticationEntryPoint() {
+        return (request, response, authException) -> {
+            System.err.println("Error de autenticación: " + authException.getMessage());
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Autenticación requerida");
+        };
+    }
+
+    // Personaliza el manejo de accesos denegados
+    @Bean
+    public AccessDeniedHandler accessDeniedHandler() {
+        return (request, response, accessDeniedException) -> {
+            System.err.println("Acceso denegado: " + accessDeniedException.getMessage());
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Acceso no autorizado");
+        };
+    }
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
