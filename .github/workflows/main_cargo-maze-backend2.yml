@@ -25,6 +25,8 @@ jobs:
 
       - name: Build and Run with Maven
         env:
+          MONGODB_NAME: ${{ secrets.MONGODB_NAME }}
+          MONGO_URI: ${{ secrets.MONGO_URI }}
           SECRET_KEY: ${{ secrets.SONAR_TOKEN }}
         run: |
           mvn clean install
