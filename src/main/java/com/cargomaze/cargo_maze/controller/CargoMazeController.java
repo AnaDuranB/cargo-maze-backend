@@ -16,9 +16,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,6 +52,14 @@ public class CargoMazeController {
         this.cargoMazeServices = cargoMazeServices;
         this.authServices = authServices;
     }
+
+    @GetMapping("/cargoMaze/resource")
+    public ResponseEntity<String> getResource(Authentication authentication) {
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        String username = jwt.getClaim("preferred_username"); // O el claim que desees usar
+        return ResponseEntity.ok("Acceso permitido a: " + username);
+    }
+
 
     @GetMapping("auth")
     public ResponseEntity<?> getToken(

@@ -13,6 +13,9 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtDecoders;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -39,22 +42,16 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .cors(Customizer.withDefaults())
-            .csrf(AbstractHttpConfigurer::disable)  // Deshabilitar CSRF si no es necesario
-            .authorizeHttpRequests(req  -> req
-                    .requestMatchers(HttpMethod.OPTIONS).permitAll()
-                    .requestMatchers("/login/**", "/stompendpoint/**", "/auth/**", "/cargoMaze/test-encryption", "/error").permitAll()
-                    .requestMatchers("/cargoMaze/**").authenticated()
+            .csrf(AbstractHttpConfigurer::disable)
+            .authorizeHttpRequests(req -> req
+                .requestMatchers(HttpMethod.OPTIONS).permitAll()
+                .requestMatchers("/login/**", "/stompendpoint/**", "/auth/**", "/error").permitAll()
+                .requestMatchers("/cargoMaze/**").authenticated() // Requiere autenticación
             )
-            .oauth2Login(oauth2 -> oauth2
-                .successHandler((request, response, authentication) -> {
-                    System.out.println("Autenticación exitosa, redirigiendo...");
-                    response.sendRedirect("/auth");
-                })
-                .failureHandler((request, response, exception) -> {
-                    System.err.println("Error de autenticación: " + exception.getMessage());
-                    response.sendRedirect("http://localhost:4200?error=true");
-                })
-            );
+            .oauth2ResourceServer(oauth2 -> oauth2
+                .jwt(Customizer.withDefaults())  // Configurar validación de JWT
+        );
+    
         return http.build();
     }
 
@@ -82,6 +79,10 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
+
 }
+
+
 
     
