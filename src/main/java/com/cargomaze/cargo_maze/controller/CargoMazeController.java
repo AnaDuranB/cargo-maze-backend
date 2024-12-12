@@ -149,23 +149,6 @@ public class CargoMazeController {
         }
     }
 
-    @PutMapping("cargoMaze/sessions/{sessionId}/players/{nickname}/move")
-    public ResponseEntity<Object> movePlayer(@RequestBody Position position, @PathVariable String sessionId,
-            @PathVariable String nickname) {
-        if (position == null) {
-            return ResponseEntity.badRequest().body(Map.of(ERROR_KEY, "position is required"));
-        }
-        try {
-            if (!cargoMazeServices.move(nickname, sessionId, position)) {
-                return ResponseEntity.badRequest().body(Map.of(ERROR_KEY, "Invalid move"));
-            }
-            return ResponseEntity.status(HttpStatus.ACCEPTED)
-                    .body(Map.of(MESSAGE_KEY, "Player moved", SESSION_ID_KEY, sessionId, NICKNAME_KEY, nickname));
-        } catch (CargoMazePersistanceException | CargoMazeServicesException ex) {
-            return ResponseEntity.badRequest().body(Map.of(ERROR_KEY, ex.getMessage()));
-        }
-    }
-
     @DeleteMapping("cargoMaze/sessions/{id}/players/{nickname}")
     public ResponseEntity<Object> removePlayerFromGame(@PathVariable String id, @PathVariable String nickname) {
         try {
