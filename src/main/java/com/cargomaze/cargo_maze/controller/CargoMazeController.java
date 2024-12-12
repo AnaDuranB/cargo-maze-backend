@@ -134,8 +134,9 @@ public class CargoMazeController {
      * Creates a new player
      */
     @PostMapping("cargoMaze/players")
-    public ResponseEntity<Object> createPlayer(@RequestBody Map<String, String> nickname, HttpSession session) {
+    public ResponseEntity<Object> createPlayer(@RequestBody Map<String, String> nickname, HttpSession session, HttpServletRequest request) {
         try {
+            transactionServices.addTransaction(request, "/cargoMaze/players", "POST");
             cargoMazeServices.createPlayer(nickname.get(NICKNAME_KEY));
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (CargoMazePersistanceException | CargoMazeServicesException ex) {
