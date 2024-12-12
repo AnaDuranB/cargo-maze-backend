@@ -32,10 +32,13 @@ public class CargoMazeController {
 
     private final CargoMazeServices cargoMazeServices;
 
+    private final Encryption encryption;
+
 
     @Autowired
-    public CargoMazeController(CargoMazeServices cargoMazeServices) {
+    public CargoMazeController(CargoMazeServices cargoMazeServices, Encryption encryption) {
         this.cargoMazeServices = cargoMazeServices;
+        this.encryption = encryption;
     }
 
     @GetMapping("/cargoMaze/resource")
@@ -62,7 +65,7 @@ public class CargoMazeController {
     public ResponseEntity<Object> getGameSession(@PathVariable String id) {
         try {
             GameSession gameSession = cargoMazeServices.getGameSession(id);
-            String encryptedData = Encryption.encrypt(new ObjectMapper().writeValueAsString(gameSession));
+            String encryptedData = encryption.encrypt(new ObjectMapper().writeValueAsString(gameSession));
 
             return ResponseEntity.ok(Map.of(DATA_KEY, encryptedData));
         } catch (CargoMazePersistanceException | EncryptionException | JsonProcessingException ex) {
@@ -74,7 +77,7 @@ public class CargoMazeController {
     public ResponseEntity<Object> getBoardState(@PathVariable String id) {
         try {
             String[][] boardState = cargoMazeServices.getBoardState(id);
-            String encryptedData = Encryption.encrypt(new ObjectMapper().writeValueAsString(boardState));
+            String encryptedData = encryption.encrypt(new ObjectMapper().writeValueAsString(boardState));
 
             return ResponseEntity.ok(Map.of(DATA_KEY, encryptedData));
         } catch (CargoMazePersistanceException | EncryptionException | JsonProcessingException ex) {
@@ -86,7 +89,7 @@ public class CargoMazeController {
     public ResponseEntity<Object> getGameSessionState(@PathVariable String id) {
         try {
             GameStatus gameSessionState = cargoMazeServices.getGameSession(id).getStatus();
-            String encryptedData = Encryption.encrypt(new ObjectMapper().writeValueAsString(gameSessionState));
+            String encryptedData = encryption.encrypt(new ObjectMapper().writeValueAsString(gameSessionState));
             return ResponseEntity.ok(Map.of(DATA_KEY, encryptedData));
         } catch ( CargoMazePersistanceException | EncryptionException | JsonProcessingException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(ERROR_KEY, ex.getMessage()));
@@ -99,7 +102,7 @@ public class CargoMazeController {
     public ResponseEntity<Object> getPlayer(@PathVariable String nickName) {
         try {
             Player player = cargoMazeServices.getPlayerById(nickName);
-            String encryptedData = Encryption.encrypt(new ObjectMapper().writeValueAsString(player));
+            String encryptedData = encryption.encrypt(new ObjectMapper().writeValueAsString(player));
             return ResponseEntity.ok(Map.of(DATA_KEY, encryptedData));
         } catch ( CargoMazePersistanceException | EncryptionException | JsonProcessingException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(ERROR_KEY, ex.getMessage()));
@@ -110,7 +113,7 @@ public class CargoMazeController {
     public ResponseEntity<Object> getPlayers() {
         try {
             List<Player> players = cargoMazeServices.getPlayers();
-            String encryptedData = Encryption.encrypt(new ObjectMapper().writeValueAsString(players));
+            String encryptedData = encryption.encrypt(new ObjectMapper().writeValueAsString(players));
             return ResponseEntity.ok(Map.of(DATA_KEY, encryptedData));
         } catch (CargoMazePersistanceException | EncryptionException | JsonProcessingException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(ERROR_KEY, ex.getMessage()));
@@ -134,7 +137,7 @@ public class CargoMazeController {
     public ResponseEntity<Object> getPlayerCount(@PathVariable String id) {
         try {
             String playerCount = Integer.toString(cargoMazeServices.getPlayerCount(id));
-            String encryptedData = Encryption.encrypt(playerCount);
+            String encryptedData = encryption.encrypt(playerCount);
 
             return new ResponseEntity<>(encryptedData, HttpStatus.OK);
         } catch (CargoMazePersistanceException | EncryptionException ex) {
@@ -162,7 +165,7 @@ public class CargoMazeController {
     public ResponseEntity<Object> getPlayersInSession(@PathVariable String id) {
         try {
             List<Player> players = cargoMazeServices.getPlayersInSession(id);
-            String encryptedData = Encryption.encrypt(new ObjectMapper().writeValueAsString(players));
+            String encryptedData = encryption.encrypt(new ObjectMapper().writeValueAsString(players));
             return ResponseEntity.ok(Map.of(DATA_KEY, encryptedData));
         } catch (CargoMazePersistanceException | JsonProcessingException | EncryptionException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(ERROR_KEY, ex.getMessage()));

@@ -29,6 +29,8 @@ jobs:
           SECRET_KEY: ${{ secrets.SONAR_TOKEN }}
           ISSUER_URI: ${{ secrets.ISSUER_URI }}
           JWT_SET_URI: ${{ secrets.JWT_SET_URI }}
+          ALGORITHM: ${{ secrets.ALGORITHM }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
         run: |
           mvn clean install
           mvn verify jacoco:report

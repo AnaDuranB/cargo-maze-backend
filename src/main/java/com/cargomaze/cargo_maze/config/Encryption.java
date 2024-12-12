@@ -1,23 +1,30 @@
 package com.cargomaze.cargo_maze.config;
 import com.cargomaze.cargo_maze.services.exceptions.EncryptionException;
-
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
+@Component
 public class Encryption {
-    private static final String ALGORITHM = "AES/CBC/PKCS5Padding";
-    private static final String SECRET_KEY = "clave-super-secreta";
 
-    private static SecretKeySpec generateKey(String key) throws EncryptionException {
+    @Value("${my.config.algorithm}")
+    private String ALGORITHM;
+
+    @Value("${my.config.secretkey}")
+    private String SECRET_KEY;
+
+    private SecretKeySpec generateKey(String key) throws EncryptionException {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hashedKey = digest.digest(key.getBytes());
@@ -29,7 +36,7 @@ public class Encryption {
         }
     }
 
-    public static String encrypt(String data) throws EncryptionException {
+    public String encrypt(String data) throws EncryptionException {
         try {
             SecretKeySpec key = generateKey(SECRET_KEY);
 
@@ -51,5 +58,4 @@ public class Encryption {
             throw new EncryptionException("Error al generar la clave: SHA-256 no disponible en este entorno.");
         }
     }
-
 }
