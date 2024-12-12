@@ -111,9 +111,9 @@ public class CargoMazeController {
     @GetMapping(value = "cargoMaze/players/{nickName}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> getPlayer(@PathVariable String nickName,HttpServletRequest request ) {
         try {
+            transactionServices.addTransaction(request, "LOGIN", "GET");
             Player player = cargoMazeServices.getPlayerById(nickName);
             String encryptedData = encryption.encrypt(new ObjectMapper().writeValueAsString(player));
-            transactionServices.addTransaction(request, "LOGIN", "GET");
             return ResponseEntity.ok(Map.of(DATA_KEY, encryptedData));
         } catch ( CargoMazePersistanceException | EncryptionException | JsonProcessingException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(ERROR_KEY, ex.getMessage()));
