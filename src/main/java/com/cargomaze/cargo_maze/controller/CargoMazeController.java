@@ -1,7 +1,6 @@
 package com.cargomaze.cargo_maze.controller;
 
 import com.cargomaze.cargo_maze.model.Player;
-import com.cargomaze.cargo_maze.model.Position;
 import com.cargomaze.cargo_maze.persistance.exceptions.*;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,12 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
-
 import com.cargomaze.cargo_maze.services.CargoMazeServices;
 import com.cargomaze.cargo_maze.services.exceptions.CargoMazeServicesException;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +31,7 @@ public class CargoMazeController {
     }
 
     @GetMapping("/cargoMaze/resource")
-    public ResponseEntity<?> getResource(Authentication authentication) {
+    public ResponseEntity<Object> getResource(Authentication authentication) {
         Map<String, String> claims = new HashMap<>();
         claims.put("Hola", "SI");
         return new ResponseEntity<>(claims, HttpStatus.ACCEPTED);
@@ -43,7 +39,7 @@ public class CargoMazeController {
 
 
     @GetMapping()
-    public ResponseEntity<?> getWelcomeMessage() {
+    public ResponseEntity<Object> getWelcomeMessage() {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

@@ -55,12 +55,6 @@ public class GameSession {
         }
     }
 
-//    public Player findPlayerByIndex(Player player) {
-//        if(players.isEmpty()){
-//            return null;
-//        }
-//        return players.get(player.getIndex());
-//    }
     public Player findPlayerByIndex(Player player) {
         if (player.getIndex() < 0 || player.getIndex() >= players.size()) {
             return null;  // Si el índice está fuera del rango de jugadores
@@ -117,8 +111,7 @@ public class GameSession {
 
     public void resetGame(){
         status = GameStatus.RESETING_GAME;
-        board.reset();  // se puede dejar ya que cambia todo el tablero.
-        //indexes.addAll(Arrays.asList(0, 1, 2, 3));
+        board.reset(); 
     }
 
 }

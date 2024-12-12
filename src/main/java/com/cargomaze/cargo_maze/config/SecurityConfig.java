@@ -7,7 +7,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
@@ -64,11 +63,11 @@ public class SecurityConfig {
         configuration.setAllowedOriginPatterns(Arrays.asList(
                 "http://localhost:4200/*",
                 "http://localhost:8080/*",
-                "https://calm-rock-0d4eb650f.5.azurestaticapps.net/*",
+                "https://ashy-flower-01560480f.4.azurestaticapps.net/*",
                 "https://proyectoarsw.duckdns.org/*",
                 "https://login.microsoftonline.com/*",
                 "http://localhost:4200",
-                "https://calm-rock-0d4eb650f.5.azurestaticapps.net",
+                "https://ashy-flower-01560480f.4.azurestaticapps.net",
                 "https://cargo-maze-backend-hwgpaheeb7hreqgv.eastus2-01.azurewebsites.net",
                 "https://cargo-maze-backend-hwgpaheeb7hreqgv.eastus2-01.azurewebsites.net/"
 

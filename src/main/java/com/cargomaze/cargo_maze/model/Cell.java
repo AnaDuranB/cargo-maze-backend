@@ -39,9 +39,6 @@ public class Cell {
         else{
             state = newState;
         }
-        if(state.equals(Cell.BOX) || state.equals(Cell.PLAYER)){
-    
-        }
     }
 
     public String getState(){
