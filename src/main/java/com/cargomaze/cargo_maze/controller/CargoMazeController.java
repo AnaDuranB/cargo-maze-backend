@@ -109,10 +109,11 @@ public class CargoMazeController {
     // Player controller
 
     @GetMapping(value = "cargoMaze/players/{nickName}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> getPlayer(@PathVariable String nickName) {
+    public ResponseEntity<Object> getPlayer(@PathVariable String nickName,HttpServletRequest request ) {
         try {
             Player player = cargoMazeServices.getPlayerById(nickName);
             String encryptedData = encryption.encrypt(new ObjectMapper().writeValueAsString(player));
+            transactionServices.addTransaction(request, "LOGIN", "GET");
             return ResponseEntity.ok(Map.of(DATA_KEY, encryptedData));
         } catch ( CargoMazePersistanceException | EncryptionException | JsonProcessingException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(ERROR_KEY, ex.getMessage()));
@@ -134,9 +135,8 @@ public class CargoMazeController {
      * Creates a new player
      */
     @PostMapping("cargoMaze/players")
-    public ResponseEntity<Object> createPlayer(@RequestBody Map<String, String> nickname, HttpSession session, HttpServletRequest request) {
+    public ResponseEntity<Object> createPlayer(@RequestBody Map<String, String> nickname, HttpSession session) {
         try {
-            transactionServices.addTransaction(request, "/cargoMaze/players", "POST");
             cargoMazeServices.createPlayer(nickname.get(NICKNAME_KEY));
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (CargoMazePersistanceException | CargoMazeServicesException ex) {
