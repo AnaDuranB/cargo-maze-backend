@@ -62,14 +62,11 @@ public class SecurityConfig {
         configuration.setAllowCredentials(true); // Permitir cookies
         configuration.setAllowedOriginPatterns(Arrays.asList(
                 "http://localhost:4200/*",
-                "http://localhost:8080/*",
                 "https://ashy-flower-01560480f.4.azurestaticapps.net/*",
                 "https://proyectoarsw.duckdns.org/*",
                 "https://login.microsoftonline.com/*",
                 "http://localhost:4200",
-                "https://ashy-flower-01560480f.4.azurestaticapps.net",
-                "https://cargo-maze-backend-hwgpaheeb7hreqgv.eastus2-01.azurewebsites.net",
-                "https://cargo-maze-backend-hwgpaheeb7hreqgv.eastus2-01.azurewebsites.net/"
+                "https://ashy-flower-01560480f.4.azurestaticapps.net"
 
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Métodos permitidos

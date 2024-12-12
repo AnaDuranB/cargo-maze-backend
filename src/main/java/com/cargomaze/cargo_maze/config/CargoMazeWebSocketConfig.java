@@ -12,7 +12,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class CargoMazeWebSocketConfig implements WebSocketMessageBrokerConfigurer  {
     private static final String[] ALLOWED_ORIGINS = {
             "http://localhost:4200",
-            "https://calm-rock-0d4eb650f.5.azurestaticapps.net",
+            "https://ashy-flower-01560480f.4.azurestaticapps.net",
             
     };
 
