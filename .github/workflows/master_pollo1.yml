@@ -31,6 +31,7 @@ jobs:
           JWT_SET_URI: ${{ secrets.JWT_SET_URI }}
           ALGORITHM: ${{ secrets.ALGORITHM }}
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          
         run: |
           mvn clean install
           mvn verify jacoco:report
