@@ -25,7 +25,6 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .cors(Customizer.withDefaults())
-            .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(req -> req
                 .requestMatchers(HttpMethod.OPTIONS).permitAll()
                 .requestMatchers("/stompendpoint/**", "/error","/").permitAll()
