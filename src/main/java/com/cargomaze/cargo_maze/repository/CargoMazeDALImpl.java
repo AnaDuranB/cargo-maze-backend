@@ -15,7 +15,6 @@ import com.cargomaze.cargo_maze.persistance.exceptions.CargoMazePersistanceExcep
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.mongodb.core.query.Criteria;
 
 @Repository

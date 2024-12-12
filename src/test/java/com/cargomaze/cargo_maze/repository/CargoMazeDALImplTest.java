@@ -2,7 +2,6 @@ package com.cargomaze.cargo_maze.repository;
 
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
-
 import com.cargomaze.cargo_maze.model.*;
 import com.cargomaze.cargo_maze.persistance.exceptions.CargoMazePersistanceException;
 import org.junit.jupiter.api.BeforeEach;

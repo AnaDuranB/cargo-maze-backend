@@ -1,7 +1,5 @@
 package com.cargomaze.cargo_maze.config;
 
-
-
 import java.util.Arrays;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,14 +21,6 @@ import jakarta.servlet.http.HttpServletResponse;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    private static final String[] ALLOWED_ORIGINS = {
-        "https://calm-rock-0d4eb650f.5.azurestaticapps.net",
-        "http://localhost:4200",
-        "http://localhost:8080",
-        "https://proyectoarsw.duckdns.org",
-        "https://login.microsoftonline.com"
-    };
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http

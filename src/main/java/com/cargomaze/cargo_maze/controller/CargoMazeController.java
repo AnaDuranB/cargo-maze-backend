@@ -3,10 +3,7 @@ package com.cargomaze.cargo_maze.controller;
 import com.cargomaze.cargo_maze.model.Player;
 import com.cargomaze.cargo_maze.model.Position;
 import com.cargomaze.cargo_maze.persistance.exceptions.*;
-import com.cargomaze.cargo_maze.services.AuthServices;
 import jakarta.servlet.http.HttpSession;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -39,7 +36,6 @@ public class CargoMazeController {
 
     @GetMapping("/cargoMaze/resource")
     public ResponseEntity<?> getResource(Authentication authentication) {
-        Jwt jwt = (Jwt) authentication.getPrincipal();
         Map<String, String> claims = new HashMap<>();
         claims.put("Hola", "SI");
         return new ResponseEntity<>(claims, HttpStatus.ACCEPTED);
@@ -59,7 +55,7 @@ public class CargoMazeController {
      * @return
      */
     @GetMapping(value = "cargoMaze/sessions/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getGameSession(@PathVariable String id) {
+    public ResponseEntity<Object> getGameSession(@PathVariable String id) {
         try {
             return new ResponseEntity<>(cargoMazeServices.getGameSession(id), HttpStatus.OK);
         } catch (CargoMazePersistanceException ex) {
@@ -68,7 +64,7 @@ public class CargoMazeController {
     }
 
     @GetMapping(value = "cargoMaze/sessions/{id}/board/state", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getBoardState(@PathVariable String id) {
+    public ResponseEntity<Object> getBoardState(@PathVariable String id) {
         try {
             return new ResponseEntity<>(cargoMazeServices.getBoardState(id), HttpStatus.ACCEPTED);
         } catch (CargoMazePersistanceException ex) {
@@ -77,7 +73,7 @@ public class CargoMazeController {
     }
 
     @GetMapping(value = "cargoMaze/sessions/{id}/state", produces = MediaType.TEXT_PLAIN_VALUE)
-    public ResponseEntity<?> getGameSessionState(@PathVariable String id) {
+    public ResponseEntity<Object> getGameSessionState(@PathVariable String id) {
         try {
             return new ResponseEntity<>(cargoMazeServices.getGameSession(id).getStatus(), HttpStatus.OK);
         } catch (CargoMazePersistanceException ex) {
@@ -88,7 +84,7 @@ public class CargoMazeController {
     // Player controller
 
     @GetMapping(value = "cargoMaze/players/{nickName}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getPlayer(@PathVariable String nickName) {
+    public ResponseEntity<Object> getPlayer(@PathVariable String nickName) {
         try {
             return new ResponseEntity<>(cargoMazeServices.getPlayerById(nickName), HttpStatus.ACCEPTED);
         } catch (CargoMazePersistanceException ex) {
@@ -97,7 +93,7 @@ public class CargoMazeController {
     }
 
     @GetMapping(value = "cargoMaze/players", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getPlayers() {
+    public ResponseEntity<Object> getPlayers() {
         try {
             return new ResponseEntity<>(cargoMazeServices.getPlayers(), HttpStatus.ACCEPTED);
         } catch (CargoMazePersistanceException ex) {
@@ -109,7 +105,7 @@ public class CargoMazeController {
      * Creates a new player
      */
     @PostMapping("cargoMaze/players")
-    public ResponseEntity<?> createPlayer(@RequestBody Map<String, String> nickname, HttpSession session) {
+    public ResponseEntity<Object> createPlayer(@RequestBody Map<String, String> nickname, HttpSession session) {
         try {
             cargoMazeServices.createPlayer(nickname.get(NICKNAME_KEY));
             return new ResponseEntity<>(HttpStatus.CREATED);
@@ -119,7 +115,7 @@ public class CargoMazeController {
     }
 
     @GetMapping(value = "cargoMaze/sessions/{id}/players/count", produces = MediaType.TEXT_PLAIN_VALUE)
-    public ResponseEntity<?> getPlayerCount(@PathVariable String id) {
+    public ResponseEntity<Object> getPlayerCount(@PathVariable String id) {
         try {
             return new ResponseEntity<>(Integer.toString(cargoMazeServices.getPlayerCount(id)), HttpStatus.OK);
         } catch (CargoMazePersistanceException ex) {
@@ -128,7 +124,7 @@ public class CargoMazeController {
     }
 
     @PutMapping("cargoMaze/sessions/{id}/players")
-    public ResponseEntity<?> addPlayerToGame(@RequestBody Map<String, String> requestBody, @PathVariable String id) {
+    public ResponseEntity<Object> addPlayerToGame(@RequestBody Map<String, String> requestBody, @PathVariable String id) {
         String nickname = requestBody.get(NICKNAME_KEY);
         if (nickname == null || nickname.isBlank()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -144,7 +140,7 @@ public class CargoMazeController {
     }
 
     @GetMapping(value = "cargoMaze/sessions/{id}/players", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getPlayersInSession(@PathVariable String id) {
+    public ResponseEntity<Object> getPlayersInSession(@PathVariable String id) {
         try {
             List<Player> players = cargoMazeServices.getPlayersInSession(id);
             return new ResponseEntity<>(players, HttpStatus.OK);
@@ -154,7 +150,7 @@ public class CargoMazeController {
     }
 
     @PutMapping("cargoMaze/sessions/{sessionId}/players/{nickname}/move")
-    public ResponseEntity<?> movePlayer(@RequestBody Position position, @PathVariable String sessionId,
+    public ResponseEntity<Object> movePlayer(@RequestBody Position position, @PathVariable String sessionId,
             @PathVariable String nickname) {
         if (position == null) {
             return ResponseEntity.badRequest().body(Map.of(ERROR_KEY, "position is required"));
@@ -171,7 +167,7 @@ public class CargoMazeController {
     }
 
     @DeleteMapping("cargoMaze/sessions/{id}/players/{nickname}")
-    public ResponseEntity<?> removePlayerFromGame(@PathVariable String id, @PathVariable String nickname) {
+    public ResponseEntity<Object> removePlayerFromGame(@PathVariable String id, @PathVariable String nickname) {
         try {
             cargoMazeServices.removePlayerFromGame(nickname, id);
             return ResponseEntity.status(HttpStatus.ACCEPTED).build();
@@ -181,7 +177,7 @@ public class CargoMazeController {
     }
 
     @PutMapping("cargoMaze/sessions/{id}/reset")
-    public ResponseEntity<?> resetGameSession(@PathVariable String id) {
+    public ResponseEntity<Object> resetGameSession(@PathVariable String id) {
         try {
             cargoMazeServices.resetGameSession(id);
             return ResponseEntity.status(HttpStatus.ACCEPTED)
@@ -192,7 +188,7 @@ public class CargoMazeController {
     }
 
     @DeleteMapping("cargoMaze/players/{id}")
-    public ResponseEntity<?> deletePlayer(@PathVariable String id) {
+    public ResponseEntity<Object> deletePlayer(@PathVariable String id) {
         try {
             cargoMazeServices.deletePlayer(id);
             return ResponseEntity.status(HttpStatus.ACCEPTED).build();
@@ -202,7 +198,7 @@ public class CargoMazeController {
     }
 
     @DeleteMapping("cargoMaze/players")
-    public ResponseEntity<?> deletePlayers() {
+    public ResponseEntity<Object> deletePlayers() {
         try {
             cargoMazeServices.deletePlayers();
             return ResponseEntity.status(HttpStatus.ACCEPTED).build();
@@ -212,7 +208,7 @@ public class CargoMazeController {
     }
 
     @PutMapping("cargoMaze/session/{sessionId}/players")
-    public ResponseEntity<?> removePlayersFromSession(@PathVariable String sessionId) {
+    public ResponseEntity<Object> removePlayersFromSession(@PathVariable String sessionId) {
         try {
             cargoMazeServices.removePlayersFromSession(sessionId);
             return ResponseEntity.status(HttpStatus.ACCEPTED).build();
@@ -222,7 +218,7 @@ public class CargoMazeController {
     }
 
     @GetMapping(value = "cargoMaze/sessions/{id}/boxes/{x}/{y}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getBoxAt(@PathVariable String id, @PathVariable int x, @PathVariable int y) {
+    public ResponseEntity<Object> getBoxAt(@PathVariable String id, @PathVariable int x, @PathVariable int y) {
         try {
             return new ResponseEntity<>(cargoMazeServices.getBoxAt(id, x, y), HttpStatus.ACCEPTED);
         } catch (CargoMazePersistanceException ex) {
@@ -231,7 +227,7 @@ public class CargoMazeController {
     }
 
     @GetMapping(value = "cargoMaze/sessions/{id}/cells/{x}/{y}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getCellAt(@PathVariable String id, @PathVariable int x, @PathVariable int y) {
+    public ResponseEntity<Object> getCellAt(@PathVariable String id, @PathVariable int x, @PathVariable int y) {
         try {
             return new ResponseEntity<>(cargoMazeServices.getCellAt(id, x, y), HttpStatus.ACCEPTED);
         } catch (CargoMazePersistanceException ex) {
@@ -240,7 +236,7 @@ public class CargoMazeController {
     }
 
     @GetMapping(value = "cargoMaze/sessions/{id}/boxes/index/{index}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getBoxAtIndex(@PathVariable String id, @PathVariable int index) {
+    public ResponseEntity<Object> getBoxAtIndex(@PathVariable String id, @PathVariable int index) {
         try {
             return new ResponseEntity<>(cargoMazeServices.getBoxAtIndex(id, index), HttpStatus.ACCEPTED);
         } catch (CargoMazePersistanceException ex) {
