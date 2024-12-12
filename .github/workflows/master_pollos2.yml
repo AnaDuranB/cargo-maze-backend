@@ -22,37 +22,8 @@ jobs:
           java-version: '17'
           distribution: 'microsoft'
 
-      - name: Build and Run with Maven
-        env:
-          MONGODB_NAME: ${{ secrets.MONGODB_NAME }}
-          MONGO_URI: ${{ secrets.MONGO_URI }}
-          SECRET_KEY: ${{ secrets.SONAR_TOKEN }}
-          ISSUER_URI: ${{ secrets.ISSUER_URI }}
-          JWT_SET_URI: ${{ secrets.JWT_SET_URI }}
-        run: |
-          mvn clean install
-          mvn verify jacoco:report
-
-      # SonarCloud Analysis
-      - name: Run SonarCloud Analysis
-        uses: sonarsource/sonarcloud-github-action@v2
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          entryPoint: "/opt/sonar-scanner/bin/sonar-scanner"
-          args: >
-            -Dsonar.projectKey=MiltonGutierrez_cargo-maze-backend
-            -Dsonar.organization=miltongutierrez
-            -Dsonar.host.url=https://sonarcloud.io
-            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
-            -Dsonar.java.binaries=target/classes
-            -Dsonar.exclusions=**/reports/**,**/test/**,**/*Test.java,**/exception/**,**/controller/*CargoMazeStompController.java,**/generated/**,**/resources/**
-            -X
-      - name: Upload JaCoCo Report as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: jacoco-report
-          path: target/site/jacoco/jacoco.xml
+      - name: Build with Maven
+        run: mvn clean install
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -66,22 +37,13 @@ jobs:
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-    permissions:
-      id-token: write #This is required for requesting the JWT
-  
+      
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: java-app
       
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_10966B9111AD4A36AD0244713EB7FB02 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_B068DB55FB9A436A88F5EFA8FFB3AC12 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_47F738092D744BCDB3AA14E962D1EC14 }}
-
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
@@ -89,4 +51,4 @@ jobs:
           app-name: 'pollos2'
           slot-name: 'Production'
           package: '*.jar'
-          
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_F52E99B8AB7443EB9736FBA78B73DDA6 }}
