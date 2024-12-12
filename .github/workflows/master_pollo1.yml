@@ -15,6 +15,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
       - name: Set up Java version
         uses: actions/setup-java@v4
@@ -30,7 +32,7 @@ jobs:
           ISSUER_URI: ${{ secrets.ISSUER_URI }}
           JWT_SET_URI: ${{ secrets.JWT_SET_URI }}
           ALGORITHM: ${{ secrets.ALGORITHM }}
-          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          SECRET_ALGORITHM_KEY: ${{ secrets.SECRET_ALGORITHM_KEY }}
         run: |
           mvn clean install
           mvn verify jacoco:report
