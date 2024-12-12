@@ -22,15 +22,44 @@ jobs:
           java-version: '17'
           distribution: 'microsoft'
 
-      - name: Build with Maven
-        run: mvn clean install
+      - name: Build and Run with Maven
+        env:
+          MONGODB_NAME: ${{ secrets.MONGODB_NAME }}
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+          SECRET_KEY: ${{ secrets.SONAR_TOKEN }}
+          ISSUER_URI: ${{ secrets.ISSUER_URI }}
+          JWT_SET_URI: ${{ secrets.JWT_SET_URI }}
+        run: |
+          mvn clean install
+          mvn verify jacoco:report
+
+      # SonarCloud Analysis
+      - name: Run SonarCloud Analysis
+        uses: sonarsource/sonarcloud-github-action@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          entryPoint: "/opt/sonar-scanner/bin/sonar-scanner"
+          args: >
+            -Dsonar.projectKey=MiltonGutierrez_cargo-maze-backend
+            -Dsonar.organization=miltongutierrez
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+            -Dsonar.java.binaries=target/classes
+            -Dsonar.exclusions=**/reports/**,**/test/**,**/*Test.java,**/exception/**,**/controller/*CargoMazeStompController.java,**/generated/**,**/resources/**
+
+      - name: Upload JaCoCo Report as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: target/site/jacoco/jacoco.xml
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: java-app
           path: '${{ github.workspace }}/target/*.jar'
-
+          
   deploy:
     runs-on: ubuntu-latest
     needs: build
