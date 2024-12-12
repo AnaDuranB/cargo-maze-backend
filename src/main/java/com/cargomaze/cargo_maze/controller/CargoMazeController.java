@@ -72,10 +72,11 @@ public class CargoMazeController {
      * @return
      */
     @GetMapping(value = "cargoMaze/sessions/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> getGameSession(@PathVariable String id) {
+    public ResponseEntity<Object> getGameSession(@PathVariable String id, HttpServletRequest request) {
         try {
             GameSession gameSession = cargoMazeServices.getGameSession(id);
             String encryptedData = encryption.encrypt(new ObjectMapper().writeValueAsString(gameSession));
+            System.out.println(transactionServices.transactionDetails(request) + " GET" + " cargoMaze/sessions/{id}");
             return ResponseEntity.ok(Map.of(DATA_KEY, encryptedData));
         } catch (CargoMazePersistanceException | EncryptionException | JsonProcessingException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(ERROR_KEY, ex.getMessage()));
