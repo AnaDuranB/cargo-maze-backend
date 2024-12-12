@@ -232,7 +232,6 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
     }
 
     @Override
-    @Transactional
     public Cell getCellAt(String gameSessionId, int x, int y) throws CargoMazePersistanceException { // dejar
         String queryString = BOARD_CELLS_DOT+x+"."+y+LOCKED_KEY_DOT;
         Query query = new Query(Criteria.where(GAME_SESSION_ID).is(gameSessionId).and(queryString).is(false)); // Filtra cajas desbloqueadas
@@ -260,7 +259,6 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
     }
 
     @Override
-    @Transactional
     public Box getBoxAtIndex(String gameSessionId, int index) throws CargoMazePersistanceException{ //dejar
         String queryString = BOARD_BOXES_DOT+index+LOCKED_KEY_DOT;
         Query query = new Query(Criteria.where(GAME_SESSION_ID).is(gameSessionId)
@@ -293,7 +291,6 @@ public class CargoMazeDALImpl implements CargoMazeDAL {
     }
 
     @Override
-    @Transactional
     public Box getBoxAt(String gameSessionId, Position boxPosition) throws CargoMazePersistanceException { // se puede dejar
         Aggregation aggregation = Aggregation.newAggregation(
                 // Filtrar por el gameSessionId
