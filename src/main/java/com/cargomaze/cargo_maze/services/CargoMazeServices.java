@@ -7,6 +7,7 @@ import com.cargomaze.cargo_maze.model.Cell;
 import com.cargomaze.cargo_maze.model.GameSession;
 import com.cargomaze.cargo_maze.model.Player;
 import com.cargomaze.cargo_maze.model.Position;
+import com.cargomaze.cargo_maze.model.Transaction;
 import com.cargomaze.cargo_maze.persistance.exceptions.CargoMazePersistanceException;
 import com.cargomaze.cargo_maze.services.exceptions.CargoMazeServicesException;
 
@@ -48,4 +49,5 @@ public interface CargoMazeServices {
     Box getBoxAt(String gameSessionId, int x, int y) throws CargoMazePersistanceException;
 
     Box getBoxAtIndex(String gameSessionId, int index) throws CargoMazePersistanceException;
+
 }

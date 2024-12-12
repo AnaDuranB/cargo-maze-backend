@@ -216,6 +216,7 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
         return false;
     }
 
+
     private boolean movePlayer(Player player, Position newPosition, Position currentPos, String sessionId)
             throws CargoMazePersistanceException {
         try {
@@ -311,5 +312,6 @@ public class CargoMazeServicesImpl implements CargoMazeServices {
                 !board.hasBoxAt(newPosition) &&
                 !board.isPlayerAt(newPosition); // aquí se presenta el problema de condicion de carrera
     }
+
 
 }

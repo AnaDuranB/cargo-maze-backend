@@ -8,6 +8,7 @@ import com.cargomaze.cargo_maze.persistance.exceptions.*;
 import com.cargomaze.cargo_maze.services.exceptions.EncryptionException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,10 +17,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import com.cargomaze.cargo_maze.services.CargoMazeServices;
+import com.cargomaze.cargo_maze.services.TransacctionsServices;
 import com.cargomaze.cargo_maze.services.exceptions.CargoMazeServicesException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 
 @RestController
 @RequestMapping("/")
@@ -34,11 +37,18 @@ public class CargoMazeController {
 
     private final Encryption encryption;
 
+    private final TransacctionsServices transactionServices;
 
     @Autowired
-    public CargoMazeController(CargoMazeServices cargoMazeServices, Encryption encryption) {
+    public CargoMazeController(CargoMazeServices cargoMazeServices, Encryption encryption, TransacctionsServices transactionServices) {
         this.cargoMazeServices = cargoMazeServices;
         this.encryption = encryption;
+        this.transactionServices = transactionServices;
+    }
+
+    @GetMapping(value = "cargoMaze/start", produces = MediaType.TEXT_PLAIN_VALUE)
+    public String startTransaction(HttpServletRequest request) {
+        return transactionServices.transactionDetails(request);
     }
 
     @GetMapping("/cargoMaze/resource")
@@ -66,7 +76,6 @@ public class CargoMazeController {
         try {
             GameSession gameSession = cargoMazeServices.getGameSession(id);
             String encryptedData = encryption.encrypt(new ObjectMapper().writeValueAsString(gameSession));
-
             return ResponseEntity.ok(Map.of(DATA_KEY, encryptedData));
         } catch (CargoMazePersistanceException | EncryptionException | JsonProcessingException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(ERROR_KEY, ex.getMessage()));
@@ -248,5 +257,10 @@ public class CargoMazeController {
         } catch (CargoMazePersistanceException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(ERROR_KEY, ex.getMessage()));
         }
+    }
+
+    @GetMapping(value = "cargoMaze/transactions", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> getTransactions() {
+        return new ResponseEntity<>(transactionServices.getTransactions(), HttpStatus.ACCEPTED);
     }
 }
